@@ -61,8 +61,7 @@ class Storage extends \Aurora\Modules\MailDomains\Managers\Domains\Storages\Defa
 						'Id' => $oRow->id_domain,
 						'TenantId' => $oRow->id_tenant,
 						'MailServerId' => $oRow->id_mail_server,
-						'Name' => $oRow->name,
-						'Count' => (int) $oRow->count
+						'Name' => $oRow->name
 					];
 				}
 			}
@@ -108,8 +107,7 @@ class Storage extends \Aurora\Modules\MailDomains\Managers\Domains\Storages\Defa
 			{
 				$mResult = [
 					'Name' => $oRow->name,
-					'MailServerId' => $oRow->id_mail_server,
-					'Count' => (int) $oRow->count
+					'MailServerId' => $oRow->id_mail_server
 				];
 			}
 		}

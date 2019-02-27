@@ -116,14 +116,6 @@ CCache.prototype.onAjaxSend = function (oParams)
 			}
 		}
 	}
-	
-	if (oParams.Module === 'Mail' && oParams.Method === 'GetServers')
-	{
-		if (oParams.Parameters.TenantId)
-		{
-			delete oParams.Parameters.TenantId;
-		}
-	}
 };
 
 CCache.prototype.onAjaxResponse = function (oParams)

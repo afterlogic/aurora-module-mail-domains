@@ -179,6 +179,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 		if ($oDomain && $oUser)
 		{
 			$oUser->{self::GetName() . '::DomainId'} = $oDomain['DomainId'];
+			$oUser->IdTenant = $oDomain['TenantId'];
 			\Aurora\Modules\Core\Module::Decorator()->UpdateUserObject($oUser);
 		}
 	}

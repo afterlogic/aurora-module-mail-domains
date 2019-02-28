@@ -28,6 +28,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 		];
 
 		$this->subscribeEvent('AdminPanelWebclient::GetEntityList::before', array($this, 'onBeforeGetEntityList'));
+		$this->subscribeEvent('AdminPanelWebclient::CreateUser::after', array($this, 'onAfterAdminPanelCreateUser'));
 		$this->subscribeEvent('Core::CreateUser::after', array($this, 'onAfterCreateUser'));
 		$this->subscribeEvent('Mail::ServerToResponseArray', array($this, 'onServerToResponseArray'));
 		$this->subscribeEvent('Mail::GetServerByDomain', array($this, 'onGetServerByDomain'));
@@ -167,16 +168,24 @@ class Module extends \Aurora\System\Module\AbstractModule
 		$this->oApiDomainsManager->createTablesFromFile();
 	}
 	
+	public function onAfterAdminPanelCreateUser(&$aData, &$mResult)
+	{
+		$oUser = \Aurora\System\Api::getUserById($mResult);
+		$aDomain = $this->oApiDomainsManager->getDomain($oUser->{self::GetName() . '::DomainId'});
+		$oServer = $this->getServersManager()->getServer($aDomain['MailServerId']);
+		\Aurora\Modules\Mail\Module::Decorator()->CreateAccount($oUser->EntityId, '', $aData['PublicId'], $aData['PublicId'], $aData['Password'], $oServer->toResponseArray());
+	}
+	
 	public function onAfterCreateUser(&$aData, &$mResult)
 	{
 		$sEmail = isset($aData['PublicId']) ? $aData['PublicId'] : '';
 		$sDomain = \MailSo\Base\Utils::GetDomainFromEmail($sEmail);
-		$oDomain = $this->oApiDomainsManager->getDomainByName($sDomain);
+		$aDomain = $this->oApiDomainsManager->getDomainByName($sDomain);
 		$oUser = \Aurora\System\Api::getUserById($mResult);
-		if ($oDomain && $oUser)
+		if ($aDomain && $oUser)
 		{
-			$oUser->{self::GetName() . '::DomainId'} = $oDomain['DomainId'];
-			$oUser->IdTenant = $oDomain['TenantId'];
+			$oUser->{self::GetName() . '::DomainId'} = $aDomain['DomainId'];
+			$oUser->IdTenant = $aDomain['TenantId'];
 			\Aurora\Modules\Core\Module::Decorator()->UpdateUserObject($oUser);
 		}
 	}

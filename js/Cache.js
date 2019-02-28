@@ -37,13 +37,18 @@ function CCache()
 		return _.isArray(aDomains) ? aDomains : [];
 	}, this);
 	
+	App.subscribeEvent('AdminPanelWebclient::ConstructView::after', function (oParams) {
+		if (oParams.Name === 'CSettingsView')
+		{
+			Ajax.send(Settings.ServerModuleName, 'GetDomains', { 'TenantId': oParams.View.selectedTenant().Id });
+		}
+	}.bind(this));
 	App.subscribeEvent('ReceiveAjaxResponse::after', this.onAjaxResponse.bind(this));
 	App.subscribeEvent('SendAjaxRequest::before', this.onAjaxSend.bind(this));
 }
 
 CCache.prototype.init = function ()
 {
-	Ajax.send(Settings.ServerModuleName, 'GetDomains');
 	Ajax.send('Mail', 'GetServers');
 };
 

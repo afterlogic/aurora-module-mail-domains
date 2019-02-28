@@ -60,14 +60,10 @@ class Module extends \Aurora\System\Module\AbstractModule
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::SuperAdmin);
 		
 		$oServer = $this->getServersManager()->getServer($MailServerId);
-		if ($DomainName === '' || !$oServer)
+		
+		if ($TenantId === 0 || $DomainName === '' || !$oServer)
 		{
 			throw new \Aurora\System\Exceptions\ApiException(\Aurora\System\Notifications::InvalidInputParameter);
-		}
-		
-		if ($TenantId === 0)
-		{
-			$TenantId = $this->getSingleDefaultTenantId();
 		}
 		
 		$mResult = $this->oApiDomainsManager->createDomain($TenantId, $MailServerId, $DomainName);
@@ -106,8 +102,9 @@ class Module extends \Aurora\System\Module\AbstractModule
 		
 		if ($TenantId === 0)
 		{
-			$TenantId = $this->getSingleDefaultTenantId();
+			throw new \Aurora\System\Exceptions\ApiException(\Aurora\System\Notifications::InvalidInputParameter);
 		}
+		
 		$aResult = [];
 		$aDomains = $this->oApiDomainsManager->getDomains($TenantId);
 		foreach ($aDomains as $aDomain) {

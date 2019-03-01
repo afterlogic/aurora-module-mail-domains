@@ -33,6 +33,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 		$this->subscribeEvent('Mail::ServerToResponseArray', array($this, 'onServerToResponseArray'));
 		$this->subscribeEvent('Mail::GetServerByDomain', array($this, 'onGetServerByDomain'));
 		$this->subscribeEvent('Core::DeleteTenant::after', array($this, 'onAfterDeleteTenant'));
+		$this->subscribeEvent('Mail::UpdateServer::after', array($this, 'onAfterUpdateServer'));
 		
 		$this->oApiDomainsManager = new Managers\Domains\Manager($this);
 
@@ -87,8 +88,14 @@ class Module extends \Aurora\System\Module\AbstractModule
 		{
 			// $mResult['AllowToDelete']
 			$mResult['AllowEditDomains'] = false;
+			
 			$aDomains = $this->oApiDomainsManager->getDomainsNames($mResult['EntityId']);
-			$mResult['Domains'] = join("\r\n", $aDomains);
+			$sDomains = join("\r\n", $aDomains);
+			if (strpos($mResult['Domains'], '*') !== false)
+			{
+				$sDomains = "*\r\n" . $sDomains;
+			}
+			$mResult['Domains'] = $sDomains;
 		}
 	}
 	
@@ -189,7 +196,39 @@ class Module extends \Aurora\System\Module\AbstractModule
 			\Aurora\Modules\Core\Module::Decorator()->UpdateUserObject($oUser);
 		}
 	}
+	
+	public function onAfterUpdateServer($aArgs, &$mResult)
+	{
+		$iServerId = $aArgs['ServerId'];
+		$iTenantId = $aArgs['TenantId'];
+		$sDomains = $aArgs['Domains'];
+		
+		$oServer = $this->getServersManager()->getServer($iServerId);
 
+		if ($oServer->OwnerType === \Aurora\Modules\Mail\Enums\ServerOwnerType::SuperAdmin)
+		{
+			\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::SuperAdmin);
+		}
+		else
+		{
+			\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::TenantAdmin);
+		}
+		
+		if ($oServer && ($oServer->OwnerType === \Aurora\Modules\Mail\Enums\ServerOwnerType::SuperAdmin || 
+				$oServer->OwnerType === \Aurora\Modules\Mail\Enums\ServerOwnerType::Tenant && $oServer->TenantId === $iTenantId))
+		{
+			if (strpos($sDomains, '*') === false)
+			{
+				$oServer->Domains = '';
+			}
+			else
+			{
+				$oServer->Domains = '*';
+			}
+			$this->getServersManager()->updateServer($oServer);
+		}
+	}
+	
 	public function onAfterDeleteTenant($aArgs, &$mResult)
 	{
 		$TenantId = $aArgs['TenantId'];
@@ -229,5 +268,4 @@ class Module extends \Aurora\System\Module\AbstractModule
 			}
 		}
 	}
-
 }

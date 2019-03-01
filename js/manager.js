@@ -28,6 +28,7 @@ module.exports = function (oAppData) {
 				 */
 				start: function (ModulesManager)
 				{
+					ModulesManager.run('MailWebclient', 'disableEditDomainsInServer');
 					Cache.init();
 					ModulesManager.run('AdminPanelWebclient', 'registerAdminPanelEntityType', [{
 						Type: 'Domain',

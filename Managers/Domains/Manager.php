@@ -31,7 +31,7 @@ class Manager extends \Aurora\System\Managers\AbstractManagerWithStorage
 	 */
 	public function createDomain($iTenantId, $iMailServerId, $sDomainName)
 	{
-		if ($this->getDomainByName($sDomainName, $iTenantId))
+		if ($this->getDomainByName($sDomainName, 0)) // domains should be unique for entire system (not only for tenant)
 		{
 			throw new \Aurora\Modules\MailDomains\Exceptions\Exception(\Aurora\Modules\MailDomains\Enums\ErrorCodes::DomainExists);
 		}

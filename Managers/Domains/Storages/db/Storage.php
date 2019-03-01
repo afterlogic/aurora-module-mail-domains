@@ -162,12 +162,13 @@ class Storage extends \Aurora\Modules\MailDomains\Managers\Domains\Storages\Defa
 	/**
 	 * Obtains domain with specified identifier.
 	 * @param string $sDomainName Domain name.
+	 * @param int $iTenantId Tenant identifier.
 	 * @return array|boolean
 	 */
-	public function getDomainByName($sDomainName)
+	public function getDomainByName($sDomainName, $iTenantId)
 	{
 		$mResult = false;
-		if ($this->oConnection->Execute($this->oCommandCreator->getDomainByName($sDomainName)))
+		if ($this->oConnection->Execute($this->oCommandCreator->getDomainByName($sDomainName, $iTenantId)))
 		{
 			$oRow = $this->oConnection->GetNextRecord();
 			if ($oRow)

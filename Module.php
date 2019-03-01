@@ -24,7 +24,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	public function init()
 	{
 		$this->aErrors = [
-			Enums\ErrorCodes::DomainExists	=> $this->i18N('ERROR_CONNECT_TO_MAIL_SERVER')
+			Enums\ErrorCodes::DomainExists	=> $this->i18N('ERROR_DOMAIN_EXISTS')
 		];
 
 		$this->subscribeEvent('AdminPanelWebclient::GetEntityList::before', array($this, 'onBeforeGetEntityList'));
@@ -75,7 +75,8 @@ class Module extends \Aurora\System\Module\AbstractModule
 	
 	public function onGetServerByDomain($aArgs, &$mResult)
 	{
-		$oDomain = $this->oApiDomainsManager->getDomainByName($aArgs['Domain']);
+		$oTenant = \Aurora\System\Api::getTenantByWebDomain();
+		$oDomain = $this->oApiDomainsManager->getDomainByName($aArgs['Domain'], $oTenant ? $oTenant->EntityId : 0);
 		if ($oDomain)
 		{
 			$mResult = $this->getServersManager()->getServer($oDomain['MailServerId']);
@@ -187,7 +188,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	{
 		$sEmail = isset($aData['PublicId']) ? $aData['PublicId'] : '';
 		$sDomain = \MailSo\Base\Utils::GetDomainFromEmail($sEmail);
-		$aDomain = $this->oApiDomainsManager->getDomainByName($sDomain);
+		$aDomain = $this->oApiDomainsManager->getDomainByName($sDomain, $aData['TenantId']);
 		$oUser = \Aurora\System\Api::getUserById($mResult);
 		if ($aDomain && $oUser)
 		{

@@ -100,19 +100,24 @@ class CommandCreator extends \Aurora\System\Db\AbstractCommandCreator
 	/**
 	 * Creates SQL-query to obtain domain with specified name.
 	 * @param string $sDomainName Domain name.
+	 * @param int $iTenantId Tenant identifier.
 	 * @return string
 	 */
-	public function getDomainByName($sDomainName)
+	public function getDomainByName($sDomainName, $iTenantId)
 	{
+		$sWhere = sprintf(' WHERE awm_domains.name = %s', $this->escapeString($sDomainName));
+		if ($iTenantId !== 0)
+		{
+			$sWhere = sprintf(' WHERE awm_domains.name = %s AND awm_domains.id_tenant = %d', $this->escapeString($sDomainName), $iTenantId);
+		}
 		$sSql = 'SELECT
 				awm_domains.id_domain,
 				awm_domains.id_tenant,
 				awm_domains.id_mail_server,
 				awm_domains.name
-			FROM awm_domains
-			WHERE awm_domains.name = %s';
-
-		return sprintf($sSql, $this->escapeString($sDomainName));
+			FROM awm_domains' . $sWhere;
+		
+		return $sSql;
 	}
 }
 

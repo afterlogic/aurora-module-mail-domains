@@ -35,14 +35,22 @@ class Module extends \Aurora\System\Module\AbstractModule
 		$this->subscribeEvent('Core::DeleteTenant::after', array($this, 'onAfterDeleteTenant'));
 		$this->subscribeEvent('Mail::UpdateServer::after', array($this, 'onAfterUpdateServer'));
 		
-		$this->oApiDomainsManager = new Managers\Domains\Manager($this);
-
 		\Aurora\Modules\Core\Classes\User::extend(
 			self::GetName(),
 			[
 				'DomainId' => array('int', 0)
 			]
 		);		
+	}
+	
+	public function getDomainsManager()
+	{
+		if ($this->oApiDomainsManager === null)
+		{
+			$this->oApiDomainsManager = new Managers\Domains\Manager($this);
+		}
+
+		return $this->oApiDomainsManager;
 	}
 	
 	protected function getServersManager()
@@ -68,7 +76,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 			throw new \Aurora\System\Exceptions\ApiException(\Aurora\System\Notifications::InvalidInputParameter);
 		}
 		
-		$mResult = $this->oApiDomainsManager->createDomain($TenantId, $MailServerId, $DomainName);
+		$mResult = $this->getDomainsManager()->createDomain($TenantId, $MailServerId, $DomainName);
 
 		return $mResult;
 	}
@@ -76,7 +84,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	public function onGetServerByDomain($aArgs, &$mResult)
 	{
 		$oTenant = \Aurora\System\Api::getTenantByWebDomain();
-		$oDomain = $this->oApiDomainsManager->getDomainByName($aArgs['Domain'], $oTenant ? $oTenant->EntityId : 0);
+		$oDomain = $this->getDomainsManager()->getDomainByName($aArgs['Domain'], $oTenant ? $oTenant->EntityId : 0);
 		if ($oDomain)
 		{
 			$mResult = $this->getServersManager()->getServer($oDomain['MailServerId']);
@@ -90,7 +98,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 			// $mResult['AllowToDelete']
 			$mResult['AllowEditDomains'] = false;
 			
-			$aDomains = $this->oApiDomainsManager->getDomainsNames($mResult['EntityId']);
+			$aDomains = $this->getDomainsManager()->getDomainsNames($mResult['EntityId']);
 			$sDomains = join("\r\n", $aDomains);
 			if (strpos($mResult['Domains'], '*') !== false)
 			{
@@ -115,7 +123,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 		}
 		
 		$aResult = [];
-		$aDomains = $this->oApiDomainsManager->getDomains($TenantId);
+		$aDomains = $this->getDomainsManager()->getDomains($TenantId);
 		foreach ($aDomains as $aDomain) {
 			$aDomain['Count'] = \Aurora\Modules\Core\Module::Decorator()->getUsersManager()->getUsersCount('', [self::GetName() . '::DomainId' => $aDomain['Id']]);
 			$aResult[] = $aDomain;
@@ -140,7 +148,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::SuperAdmin);
 		
-		$aDomain = $this->oApiDomainsManager->getDomain($Id);
+		$aDomain = $this->getDomainsManager()->getDomain($Id);
 		$aDomain['Count'] = \Aurora\Modules\Core\Module::Decorator()->getUsersManager()->getUsersCount('', [self::GetName() . '::DomainId' => $aDomain['Id']]);
 		
 		return $aDomain;
@@ -166,20 +174,20 @@ class Module extends \Aurora\System\Module\AbstractModule
 			}
 			
 			// delete domain
-			$mResult = $this->oApiDomainsManager->deleteDomain($iDomainId);
+			$mResult = $this->getDomainsManager()->deleteDomain($iDomainId);
 		}
 		return $mResult;
 	}
 	
 	public function onAfterCreateTables(&$aData, &$mResult)
 	{
-		$this->oApiDomainsManager->createTablesFromFile();
+		$this->getDomainsManager()->createTablesFromFile();
 	}
 	
 	public function onAfterAdminPanelCreateUser(&$aData, &$mResult)
 	{
 		$oUser = \Aurora\System\Api::getUserById($mResult);
-		$aDomain = $this->oApiDomainsManager->getDomain($oUser->{self::GetName() . '::DomainId'});
+		$aDomain = $this->getDomainsManager()->getDomain($oUser->{self::GetName() . '::DomainId'});
 		$oServer = $this->getServersManager()->getServer($aDomain['MailServerId']);
 		\Aurora\Modules\Mail\Module::Decorator()->CreateAccount($oUser->EntityId, '', $aData['PublicId'], $aData['PublicId'], $aData['Password'], $oServer->toResponseArray());
 	}
@@ -188,7 +196,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	{
 		$sEmail = isset($aData['PublicId']) ? $aData['PublicId'] : '';
 		$sDomain = \MailSo\Base\Utils::GetDomainFromEmail($sEmail);
-		$aDomain = $this->oApiDomainsManager->getDomainByName($sDomain, $aData['TenantId']);
+		$aDomain = $this->getDomainsManager()->getDomainByName($sDomain, $aData['TenantId']);
 		$oUser = \Aurora\System\Api::getUserById($mResult);
 		if ($aDomain && $oUser)
 		{

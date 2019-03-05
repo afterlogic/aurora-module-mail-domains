@@ -150,7 +150,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::SuperAdmin);
 		
 		$aDomain = $this->getDomainsManager()->getDomain($Id);
-		$aDomain['Count'] = \Aurora\Modules\Core\Module::Decorator()->getUsersManager()->getUsersCount('', [self::GetName() . '::DomainId' => $aDomain['Id']]);
+		$aDomain['Count'] = \Aurora\Modules\Core\Module::Decorator()->getUsersManager()->getUsersCount('', [self::GetName() . '::DomainId' => $Id]);
 		
 		return $aDomain;
 	}

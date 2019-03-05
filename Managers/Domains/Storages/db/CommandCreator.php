@@ -67,8 +67,7 @@ class CommandCreator extends \Aurora\System\Db\AbstractCommandCreator
 				awm_domains.name,
 				awm_domains.id_mail_server
 			FROM awm_domains
-			WHERE awm_domains.id_domain = %d
-			GROUP BY awm_domains.id_domain';
+			WHERE awm_domains.id_domain = %d';
 		
 		return sprintf($sSql, $iDomainId);
 	}

@@ -27,6 +27,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 			Enums\ErrorCodes::DomainExists	=> $this->i18N('ERROR_DOMAIN_EXISTS')
 		];
 
+		$this->subscribeEvent('Core::CreateTables::after', array($this, 'onAfterCreateTables'));
 		$this->subscribeEvent('AdminPanelWebclient::GetEntityList::before', array($this, 'onBeforeGetEntityList'));
 		$this->subscribeEvent('AdminPanelWebclient::CreateUser::after', array($this, 'onAfterAdminPanelCreateUser'));
 		$this->subscribeEvent('Core::CreateUser::after', array($this, 'onAfterCreateUser'));

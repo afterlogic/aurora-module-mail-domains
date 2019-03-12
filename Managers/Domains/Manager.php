@@ -13,14 +13,21 @@ namespace Aurora\Modules\MailDomains\Managers\Domains;
  * @package MailDomains
  * @subpackage Managers
  */
-class Manager extends \Aurora\System\Managers\AbstractManagerWithStorage
+class Manager extends \Aurora\System\Managers\AbstractManager
 {
+	/**
+	 * @var \Aurora\System\Managers\Eav
+	 */
+	public $oEavManager = null;
+	
 	/**
 	 * @param \Aurora\System\Module\AbstractModule $oModule
 	 */
 	public function __construct(\Aurora\System\Module\AbstractModule $oModule = null)
 	{
-		parent::__construct($oModule, new \Aurora\Modules\MailDomains\Managers\Domains\Storages\db\Storage($this));
+		parent::__construct($oModule);
+		
+		$this->oEavManager = \Aurora\System\Managers\Eav::getInstance();
 	}
 
 	/**
@@ -35,7 +42,14 @@ class Manager extends \Aurora\System\Managers\AbstractManagerWithStorage
 		{
 			throw new \Aurora\Modules\MailDomains\Exceptions\Exception(\Aurora\Modules\MailDomains\Enums\ErrorCodes::DomainExists);
 		}
-		return $this->oStorage->createDomain($iTenantId, $iMailServerId, $sDomainName);
+		
+		$oDomain = new \Aurora\Modules\MailDomains\Classes\Domain(\Aurora\Modules\MailDomains\Module::GetName());
+		$oDomain->TenantId = $iTenantId;
+		$oDomain->MailServerId = $iMailServerId;
+		$oDomain->Name = $sDomainName;
+		$this->oEavManager->saveEntity($oDomain);
+		
+		return $oDomain->EntityId;
 	}
 	
 	/**
@@ -45,7 +59,21 @@ class Manager extends \Aurora\System\Managers\AbstractManagerWithStorage
 	 */
 	public function getDomains($iTenantId)
 	{
-		return $this->oStorage->getDomains($iTenantId);
+		$iOffset = 0;
+		$iLimit = 0;
+		$aFilters = ['TenantId' => [$iTenantId, '=']];
+		$sOrderBy = 'Name';
+		$iOrderType = \Aurora\System\Enums\SortOrder::ASC;
+		
+		return $this->oEavManager->getEntities(
+			\Aurora\Modules\MailDomains\Classes\Domain::class,
+			array(),
+			$iOffset,
+			$iLimit,
+			$aFilters,
+			$sOrderBy,
+			$iOrderType
+		);
 	}
 	
 	/**
@@ -55,7 +83,27 @@ class Manager extends \Aurora\System\Managers\AbstractManagerWithStorage
 	 */
 	public function getDomainsNames($iMailServerId)
 	{
-		return $this->oStorage->getDomainsNames($iMailServerId);
+		$iOffset = 0;
+		$iLimit = 0;
+		$aFilters = ['MailServerId' => [$iMailServerId, '=']];
+		$sOrderBy = 'Name';
+		$iOrderType = \Aurora\System\Enums\SortOrder::ASC;
+		
+		$aDomains = $this->oEavManager->getEntities(
+			\Aurora\Modules\MailDomains\Classes\Domain::class,
+			array('Name'),
+			$iOffset,
+			$iLimit,
+			$aFilters,
+			$sOrderBy,
+			$iOrderType
+		);
+		$aDomainsNames = [];
+		foreach ($aDomains as $oDomain)
+		{
+			$aDomainsNames[] = $oDomain->Name;
+		}
+		return $aDomainsNames;
 	}
 	
 	/**
@@ -65,7 +113,7 @@ class Manager extends \Aurora\System\Managers\AbstractManagerWithStorage
 	 */
 	public function getDomain($iDomainId)
 	{
-		return $this->oStorage->getDomain($iDomainId);
+		return $this->oEavManager->getEntity($iDomainId, \Aurora\Modules\MailDomains\Classes\Domain::class);
 	}
 	
 	/**
@@ -75,17 +123,13 @@ class Manager extends \Aurora\System\Managers\AbstractManagerWithStorage
 	 */
 	public function deleteDomain($iDomainId)
 	{
-		return $this->oStorage->deleteDomain($iDomainId);
-	}
-
-	/**
-	 * Get domain member emails list.
-	 * @param int $iDomainId domain identifier.
-	 * @return boolean
-	 */
-	public function getDomainMembers($iDomainId)
-	{
-		return $this->oStorage->getDomainMembers($iDomainId);
+		$bResult = false;
+		$oDomain = $this->getDomain($iDomainId);
+		if ($oDomain)
+		{
+			$bResult = $this->oEavManager->deleteEntity($iDomainId);
+		}
+		return $bResult;
 	}
 
 	/**
@@ -96,19 +140,33 @@ class Manager extends \Aurora\System\Managers\AbstractManagerWithStorage
 	 */
 	public function getDomainByName($sDomainName, $iTenantId)
 	{
-		return $this->oStorage->getDomainByName($sDomainName, $iTenantId);
-	}
-	
-	/**
-	 * Creates tables required for module work by executing create.sql file.
-	 *
-	 * @return boolean
-	 */
-	public function createTablesFromFile()
-	{
-		$sFilePath = dirname(__FILE__) . '/Storages/db/Sql/create.sql';
-		$bResult = \Aurora\System\Managers\Db::getInstance()->executeSqlFile($sFilePath);
+		$iOffset = 0;
+		$iLimit = 0;
+		$aFilters = [];
+		if ($iTenantId === 0)
+		{
+			$aFilters = ['Name' => [$sDomainName, '=']];
+		}
+		else
+		{
+			$aFilters = ['$AND' => [
+				'TenantId' => [$iTenantId, '='],
+				'Name' => [$sDomainName, '=']
+			]];
+		}
+		$sOrderBy = 'Name';
+		$iOrderType = \Aurora\System\Enums\SortOrder::ASC;
 		
-		return $bResult;
+		$aDomains = $this->oEavManager->getEntities(
+			\Aurora\Modules\MailDomains\Classes\Domain::class,
+			array(),
+			$iOffset,
+			$iLimit,
+			$aFilters,
+			$sOrderBy,
+			$iOrderType
+		);
+		
+		return count($aDomains) > 0 ? $aDomains[0] : false;
 	}
 }

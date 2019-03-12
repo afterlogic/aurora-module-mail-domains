@@ -27,14 +27,15 @@ class Module extends \Aurora\System\Module\AbstractModule
 			Enums\ErrorCodes::DomainExists	=> $this->i18N('ERROR_DOMAIN_EXISTS')
 		];
 
-		$this->subscribeEvent('Core::CreateTables::after', array($this, 'onAfterCreateTables'));
 		$this->subscribeEvent('AdminPanelWebclient::GetEntityList::before', array($this, 'onBeforeGetEntityList'));
 		$this->subscribeEvent('AdminPanelWebclient::CreateUser::after', array($this, 'onAfterAdminPanelCreateUser'));
+		
 		$this->subscribeEvent('Core::CreateUser::after', array($this, 'onAfterCreateUser'));
+		$this->subscribeEvent('Core::DeleteTenant::after', array($this, 'onAfterDeleteTenant'));
+		
+		$this->subscribeEvent('Mail::UpdateServer::after', array($this, 'onAfterUpdateServer'));
 		$this->subscribeEvent('Mail::ServerToResponseArray', array($this, 'onServerToResponseArray'));
 		$this->subscribeEvent('Mail::GetServerByDomain', array($this, 'onGetServerByDomain'));
-		$this->subscribeEvent('Core::DeleteTenant::after', array($this, 'onAfterDeleteTenant'));
-		$this->subscribeEvent('Mail::UpdateServer::after', array($this, 'onAfterUpdateServer'));
 		
 		\Aurora\Modules\Core\Classes\User::extend(
 			self::GetName(),
@@ -125,9 +126,10 @@ class Module extends \Aurora\System\Module\AbstractModule
 		
 		$aResult = [];
 		$aDomains = $this->getDomainsManager()->getDomains($TenantId);
-		foreach ($aDomains as $aDomain) {
-			$aDomain['Count'] = \Aurora\Modules\Core\Module::Decorator()->getUsersManager()->getUsersCount('', [self::GetName() . '::DomainId' => $aDomain['Id']]);
-			$aResult[] = $aDomain;
+		foreach ($aDomains as $oDomain)
+		{
+			$oDomain->Count = \Aurora\Modules\Core\Module::Decorator()->getUsersManager()->getUsersCount('', [self::GetName() . '::DomainId' => $oDomain->EntityId]);
+			$aResult[] = $oDomain;
 		}
 		if (is_array($aDomains))
 		{
@@ -149,10 +151,10 @@ class Module extends \Aurora\System\Module\AbstractModule
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::SuperAdmin);
 		
-		$aDomain = $this->getDomainsManager()->getDomain($Id);
-		$aDomain['Count'] = \Aurora\Modules\Core\Module::Decorator()->getUsersManager()->getUsersCount('', [self::GetName() . '::DomainId' => $Id]);
+		$oDomain = $this->getDomainsManager()->getDomain($Id);
+		$oDomain->Count = \Aurora\Modules\Core\Module::Decorator()->getUsersManager()->getUsersCount('', [self::GetName() . '::DomainId' => $Id]);
 		
-		return $aDomain;
+		return $oDomain;
 	}
 	
 	/**
@@ -180,16 +182,11 @@ class Module extends \Aurora\System\Module\AbstractModule
 		return $mResult;
 	}
 	
-	public function onAfterCreateTables(&$aData, &$mResult)
-	{
-		$this->getDomainsManager()->createTablesFromFile();
-	}
-	
 	public function onAfterAdminPanelCreateUser(&$aData, &$mResult)
 	{
 		$oUser = \Aurora\System\Api::getUserById($mResult);
-		$aDomain = $this->getDomainsManager()->getDomain($oUser->{self::GetName() . '::DomainId'});
-		$oServer = $this->getServersManager()->getServer($aDomain['MailServerId']);
+		$oDomain = $this->getDomainsManager()->getDomain($oUser->{self::GetName() . '::DomainId'});
+		$oServer = $this->getServersManager()->getServer($oDomain->MailServerId);
 		\Aurora\Modules\Mail\Module::Decorator()->CreateAccount($oUser->EntityId, '', $aData['PublicId'], $aData['PublicId'], $aData['Password'], $oServer->toResponseArray());
 	}
 	
@@ -197,12 +194,12 @@ class Module extends \Aurora\System\Module\AbstractModule
 	{
 		$sEmail = isset($aData['PublicId']) ? $aData['PublicId'] : '';
 		$sDomain = \MailSo\Base\Utils::GetDomainFromEmail($sEmail);
-		$aDomain = $this->getDomainsManager()->getDomainByName($sDomain, $aData['TenantId']);
+		$oDomain = $this->getDomainsManager()->getDomainByName($sDomain, $aData['TenantId']);
 		$oUser = \Aurora\System\Api::getUserById($mResult);
-		if ($aDomain && $oUser)
+		if ($oDomain && $oUser)
 		{
-			$oUser->{self::GetName() . '::DomainId'} = $aDomain['DomainId'];
-			$oUser->IdTenant = $aDomain['TenantId'];
+			$oUser->{self::GetName() . '::DomainId'} = $oDomain->EntityId;
+			$oUser->IdTenant = $oDomain->TenantId;
 			\Aurora\Modules\Core\Module::Decorator()->UpdateUserObject($oUser);
 		}
 	}
@@ -249,9 +246,9 @@ class Module extends \Aurora\System\Module\AbstractModule
 		{
 			foreach ($aDomains['Items'] as $oDomain)
 			{
-				if ($oDomain['TenantId'] === $TenantId)
+				if ($oDomain->TenantId === $TenantId)
 				{
-					$aDomainIds[] = $oDomain['Id'];
+					$aDomainIds[] = $oDomain->EntityId;
 				}
 			}
 		}

@@ -89,7 +89,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 		$oDomain = $this->getDomainsManager()->getDomainByName($aArgs['Domain'], $oTenant ? $oTenant->EntityId : 0);
 		if ($oDomain)
 		{
-			$mResult = $this->getServersManager()->getServer($oDomain['MailServerId']);
+			$mResult = $this->getServersManager()->getServer($oDomain->MailServerId);
 		}
 	}
 	

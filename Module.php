@@ -185,9 +185,12 @@ class Module extends \Aurora\System\Module\AbstractModule
 	public function onAfterAdminPanelCreateUser(&$aData, &$mResult)
 	{
 		$oUser = \Aurora\System\Api::getUserById($mResult);
-		$oDomain = $this->getDomainsManager()->getDomain($oUser->{self::GetName() . '::DomainId'});
-		$oServer = $this->getServersManager()->getServer($oDomain->MailServerId);
-		\Aurora\Modules\Mail\Module::Decorator()->CreateAccount($oUser->EntityId, '', $aData['PublicId'], $aData['PublicId'], $aData['Password'], $oServer->toResponseArray());
+		$oDomain = $oUser ? $this->getDomainsManager()->getDomain($oUser->{self::GetName() . '::DomainId'}) : null;
+		$oServer = $oDomain ? $this->getServersManager()->getServer($oDomain->MailServerId) : null;
+		if ($oServer)
+		{
+			\Aurora\Modules\Mail\Module::Decorator()->CreateAccount($oUser->EntityId, '', $aData['PublicId'], $aData['PublicId'], $aData['Password'], $oServer->toResponseArray());
+		}
 	}
 	
 	public function onAfterCreateUser(&$aData, &$mResult)

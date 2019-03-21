@@ -8,7 +8,7 @@ namespace Aurora\Modules\MailDomains\Managers\Domains;
 
 /**
  * @license https://afterlogic.com/products/common-licensing AfterLogic Software License
- * @copyright Copyright (c) 2018, Afterlogic Corp.
+ * @copyright Copyright (c) 2019, Afterlogic Corp.
  *
  * @package MailDomains
  * @subpackage Managers

@@ -38,7 +38,7 @@ function CCache()
 	}, this);
 	
 	App.subscribeEvent('AdminPanelWebclient::ConstructView::after', function (oParams) {
-		if (oParams.Name === 'CSettingsView')
+		if (oParams.Name === 'CSettingsView' && Types.isPositiveNumber(oParams.View.selectedTenant().Id))
 		{
 			Ajax.send(Settings.ServerModuleName, 'GetDomains', { 'TenantId': oParams.View.selectedTenant().Id });
 		}

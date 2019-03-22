@@ -71,9 +71,9 @@ class Module extends \Aurora\System\Module\AbstractModule
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::SuperAdmin);
 		
+		$oTenant = \Aurora\Modules\Core\Module::Decorator()->GetTenantById($TenantId);
 		$oServer = $this->getServersManager()->getServer($MailServerId);
-		
-		if ($TenantId === 0 || $DomainName === '' || !$oServer)
+		if (!$oTenant || !$oServer || $DomainName === '')
 		{
 			throw new \Aurora\System\Exceptions\ApiException(\Aurora\System\Notifications::InvalidInputParameter);
 		}

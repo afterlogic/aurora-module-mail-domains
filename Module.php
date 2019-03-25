@@ -113,9 +113,12 @@ class Module extends \Aurora\System\Module\AbstractModule
 	/**
 	 * Obtains all domains for specified tenant.
 	 * @param int $TenantId Tenant identifier.
+	 * @param int $Offset Offset of the list.
+	 * @param int $Limit Limit of the list.
+	 * @param string $Search Search string.
 	 * @return array|boolean
 	 */
-	public function GetDomains($TenantId = 0)
+	public function GetDomains($TenantId = 0, $Offset = 0, $Limit = 0, $Search = '')
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::SuperAdmin);
 		
@@ -125,7 +128,8 @@ class Module extends \Aurora\System\Module\AbstractModule
 		}
 		
 		$aResult = [];
-		$aDomains = $this->getDomainsManager()->getDomains($TenantId);
+		$aDomains = $this->getDomainsManager()->getDomains($TenantId, $Offset, $Limit, $Search);
+		$iDomainsCount = $this->getDomainsManager()->getDomainsCount($TenantId, $Search);
 		foreach ($aDomains as $oDomain)
 		{
 			$oDomain->Count = \Aurora\Modules\Core\Module::Decorator()->getUsersManager()->getUsersCount('', [self::GetName() . '::DomainId' => $oDomain->EntityId]);
@@ -134,7 +138,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 		if (is_array($aDomains))
 		{
 			return [
-				'Count' => count($aResult),
+				'Count' => $iDomainsCount,
 				'Items' => $aResult
 			];
 		}

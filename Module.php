@@ -215,7 +215,6 @@ class Module extends \Aurora\System\Module\AbstractModule
 	{
 		$iServerId = $aArgs['ServerId'];
 		$iTenantId = $aArgs['TenantId'];
-		$sDomains = $aArgs['Domains'];
 		
 		$oServer = $this->getServersManager()->getServer($iServerId);
 
@@ -231,14 +230,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 		if ($oServer && ($oServer->OwnerType === \Aurora\Modules\Mail\Enums\ServerOwnerType::SuperAdmin || 
 				$oServer->OwnerType === \Aurora\Modules\Mail\Enums\ServerOwnerType::Tenant && $oServer->TenantId === $iTenantId))
 		{
-			if (strpos($sDomains, '*') === false)
-			{
-				$oServer->Domains = '';
-			}
-			else
-			{
-				$oServer->Domains = '*';
-			}
+			$oServer->Domains = '';
 			$this->getServersManager()->updateServer($oServer);
 		}
 	}

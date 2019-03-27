@@ -127,17 +127,20 @@ CCache.prototype.onAjaxResponse = function (oParams)
 {
 	if (oParams.Response.Module === Settings.ServerModuleName && oParams.Response.Method === 'GetDomains')
 	{
-		var
-			iTenantId = oParams.Request.Parameters.TenantId,
-			aDomains = oParams.Response.Result && _.isArray(oParams.Response.Result.Items) ? oParams.Response.Result.Items : []
-		;
-		
-		_.each(aDomains, function (oDomain) {
-			oDomain.Id = Types.pInt(oDomain.Id);
-		});
-		
-		this.domainsByTenants()[iTenantId] = aDomains;
-		this.domainsByTenants.valueHasMutated();
+		if (oParams.Request.Parameters.Search === '' && oParams.Request.Parameters.Offset === 0)
+		{
+			var
+				iTenantId = oParams.Request.Parameters.TenantId,
+				aDomains = oParams.Response.Result && _.isArray(oParams.Response.Result.Items) ? oParams.Response.Result.Items : []
+			;
+
+			_.each(aDomains, function (oDomain) {
+				oDomain.Id = Types.pInt(oDomain.Id);
+			});
+
+			this.domainsByTenants()[iTenantId] = aDomains;
+			this.domainsByTenants.valueHasMutated();
+		}
 	}
 	
 	if (oParams.Response.Module === 'Mail' && oParams.Response.Method === 'GetServers')

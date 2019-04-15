@@ -40,7 +40,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 		\Aurora\Modules\Core\Classes\User::extend(
 			self::GetName(),
 			[
-				'DomainId' => array('int', 0)
+				'DomainId' => array('int', 0, true)
 			]
 		);		
 	}
@@ -259,7 +259,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 
 	public function onBeforeGetEntityList(&$aArgs, &$mResult)
 	{
-		if ($aArgs['Type'] === 'User' && isset($aArgs['DomainId']) && $aArgs['DomainId'] !== 0)
+		if ($aArgs['Type'] === 'User' && isset($aArgs['DomainId']) && $aArgs['DomainId'] !== -1)
 		{
 			if (isset($aArgs['Filters']) && is_array($aArgs['Filters']) && count($aArgs['Filters']) > 0)
 			{

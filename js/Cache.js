@@ -64,7 +64,7 @@ CCache.prototype.showErrorIfDomainsEmpty = function ()
 		fShowErrorIfDomainsEmpty = function () {
 			if (this.domains().length === 0)
 			{
-				Screens.showError(TextUtils.i18n('%MODULENAME%/ERROR_CREATE_DOMAIN_FIRST'));
+				Screens.showError(TextUtils.i18n('%MODULENAME%/ERROR_ADD_DOMAIN_FIRST'));
 			}
 			else
 			{

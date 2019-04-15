@@ -17,7 +17,6 @@ var
  */
 function CEditUserView()
 {
-	this.sHeading = TextUtils.i18n('ADMINPANELWEBCLIENT/HEADING_CREATE_USER');
 	this.id = ko.observable(0);
 	this.publicId = ko.observable('');
 	this.domains = Cache.domains;
@@ -30,6 +29,10 @@ function CEditUserView()
 	];
 	this.role = ko.observable(Enums.UserRole.NormalUser);
 	this.writeSeparateLog = ko.observable(false);
+	
+	this.sHeading = TextUtils.i18n('ADMINPANELWEBCLIENT/HEADING_CREATE_USER');
+	this.sActionCreate = TextUtils.i18n('COREWEBCLIENT/ACTION_CREATE');
+	this.sActionCreateInProgress = TextUtils.i18n('COREWEBCLIENT/ACTION_CREATE_IN_PROGRESS');
 	
 	App.broadcastEvent('%ModuleName%::ConstructView::after', {'Name': this.ViewConstructorName, 'View': this});
 }

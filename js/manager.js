@@ -43,9 +43,9 @@ module.exports = function (oAppData) {
 						DeleteRequest: 'DeleteDomains',
 
 						NoEntitiesFoundText: TextUtils.i18n('%MODULENAME%/INFO_NO_ENTITIES_FOUND_MAILDOMAIN'),
-						ActionCreateText: TextUtils.i18n('%MODULENAME%/ACTION_CREATE_ENTITY_MAILDOMAIN'),
-						ReportSuccessCreateText: TextUtils.i18n('%MODULENAME%/REPORT_CREATE_ENTITY_MAILDOMAIN'),
-						ErrorCreateText: TextUtils.i18n('%MODULENAME%/ERROR_CREATE_ENTITY_MAILDOMAIN'),
+						ActionCreateText: TextUtils.i18n('%MODULENAME%/ACTION_ADD_ENTITY_MAILDOMAIN'),
+						ReportSuccessCreateText: TextUtils.i18n('%MODULENAME%/REPORT_ADD_ENTITY_MAILDOMAIN'),
+						ErrorCreateText: TextUtils.i18n('%MODULENAME%/ERROR_ADD_ENTITY_MAILDOMAIN'),
 						CommonSettingsHeadingText: TextUtils.i18n('%MODULENAME%/HEADING_EDIT_MAILDOMAIN'),
 						ActionDeleteText: TextUtils.i18n('%MODULENAME%/ACTION_DELETE_MAILDOMAIN'),
 						ConfirmDeleteLangConst: '%MODULENAME%/CONFIRM_DELETE_MAILDOMAIN_PLURAL',

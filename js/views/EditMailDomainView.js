@@ -17,7 +17,6 @@ var
  */
 function CEditMailDomainView()
 {
-	this.sHeading = TextUtils.i18n('%MODULENAME%/HEADING_CREATE_MAILDOMAIN');
 	this.id = ko.observable(0);
 	this.domain = ko.observable('');
 	this.selectedMailServer = ko.observable(0);
@@ -34,6 +33,10 @@ function CEditMailDomainView()
 		}.bind(this));
 		return oSelectedServer ? oSelectedServer.Name : '';
 	}, this);
+	
+	this.sHeading = TextUtils.i18n('%MODULENAME%/HEADING_ADD_MAILDOMAIN');
+	this.sActionCreate = TextUtils.i18n('%MODULENAME%/ACTION_ADD');
+	this.sActionCreateInProgress = TextUtils.i18n('%MODULENAME%/ACTION_ADD_IN_PROGRESS');
 }
 
 CEditMailDomainView.prototype.ViewTemplate = '%ModuleName%_EditMailDomainView';

@@ -9,6 +9,7 @@ var
 	
 	Screens = require('%PathToCoreWebclientModule%/js/Screens.js'),
 	App = require('%PathToCoreWebclientModule%/js/App.js'),
+	
 	Cache = require('modules/%ModuleName%/js/Cache.js')
 ;
 
@@ -127,11 +128,11 @@ CEditUserView.prototype.getParametersForSave = function ()
 CEditUserView.prototype.saveEntity = function (aParents, oRoot)
 {
 	_.each(aParents, function (oParent) {
-		if (oParent.constructor.name === 'CEntitiesView' && _.isFunction(oParent.createEntity))
+		if (_.isFunction(oParent.createEntity))
 		{
 			oParent.createEntity();
 		}
-		if (oParent.constructor.name === 'CCommonSettingsPaneView' && _.isFunction(oParent.save))
+		else if (_.isFunction(oParent.save))
 		{
 			oParent.save(oRoot);
 		}

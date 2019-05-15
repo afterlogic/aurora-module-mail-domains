@@ -10,7 +10,7 @@
 			onEnter: function () { saveEntity($parents, $root); }" />
 	</span>
 </div>
-<div class="row">
+<div class="row" data-bind="visible: id() === 0">
 	<span class="label" data-bind="i18n: {'key': 'COREWEBCLIENT/LABEL_PASSWORD'}"></span>
 	<span class="value">
 		<input class="input" autocomplete="new-password" type="password" data-bind="value: password, valueUpdate: 'afterkeydown', 

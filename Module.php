@@ -201,7 +201,19 @@ class Module extends \Aurora\System\Module\AbstractModule
 		$oServer = $oDomain ? $this->getServersManager()->getServer($oDomain->MailServerId) : null;
 		if ($oServer)
 		{
-			\Aurora\Modules\Mail\Module::Decorator()->CreateAccount($oUser->EntityId, '', $aData['PublicId'], $aData['PublicId'], $aData['Password'], $oServer->toResponseArray());
+			try
+			{
+				\Aurora\Modules\Mail\Module::Decorator()->CreateAccount($oUser->EntityId, '', $aData['PublicId'], $aData['PublicId'], $aData['Password'], $oServer->toResponseArray());
+			}
+			catch(\Exception $oException)
+			{
+				\Aurora\Modules\Core\Module::Decorator()->DeleteUser($oUser->EntityId);
+				throw $oException;
+			}
+		}
+		else
+		{
+			\Aurora\Modules\Core\Module::Decorator()->DeleteUser($oUser->EntityId);
 		}
 	}
 	

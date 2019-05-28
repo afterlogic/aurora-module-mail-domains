@@ -78,6 +78,9 @@ module.exports = function (oAppData) {
 						ErrorDeleteLangConst: '%MODULENAME%/ERROR_DELETE_ENTITIES_MAILDOMAIN_PLURAL'
 					}]);
 					ChangeAdminPanelUserEntityData();
+				},
+				getMailDomainsCache: function () {
+					return Cache;
 				}
 			};
 		}
@@ -94,6 +97,9 @@ module.exports = function (oAppData) {
 				{
 					Cache.init();
 					ChangeAdminPanelUserEntityData();
+				},
+				getMailDomainsCache: function () {
+					return Cache;
 				}
 			};
 		}

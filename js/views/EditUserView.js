@@ -147,34 +147,4 @@ CEditUserView.prototype.onRoute = function (aTabParams, aCurrentEntitiesId)
 	}
 };
 
-CEditUserView.prototype.showAdvancedReport = function (sMessage, oResponse)
-{
-	var
-		sSubMessage = '',
-		oSubscriptionResult = null
-	;
-
-	if (oResponse.SubscriptionsResult &&
-		oResponse.SubscriptionsResult["MtaConnector::onAfterUpdateEntity"])
-	{
-		oSubscriptionResult = oResponse.SubscriptionsResult["MtaConnector::onAfterUpdateEntity"];
-	}
-
-	if (!oSubscriptionResult || !oSubscriptionResult.Result ||
-		(typeof oSubscriptionResult.IsPasswordChanged !== 'undefined'  && oSubscriptionResult.IsPasswordChanged === false))
-	{
-		Screens.showError(TextUtils.i18n('%MODULENAME%/ERROR_PASSWORD_NOT_UPDATED'));
-	}
-	else if (typeof oSubscriptionResult.IsPasswordChanged !== 'undefined'  && oSubscriptionResult.IsPasswordChanged === true)
-	{
-		sSubMessage = '<br>' + TextUtils.i18n('%MODULENAME%/PASSWORD_UPDATED');
-	}
-	else
-	{
-		sSubMessage = '<br>' + TextUtils.i18n('%MODULENAME%/PASSWORD_NOT_UPDATED');
-	}
-
-	Screens.showReport(sMessage + sSubMessage);
-};
-
 module.exports = new CEditUserView();

@@ -36,6 +36,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 		$this->subscribeEvent('Mail::UpdateServer::after', array($this, 'onAfterUpdateServer'));
 		$this->subscribeEvent('Mail::ServerToResponseArray', array($this, 'onServerToResponseArray'));
 		$this->subscribeEvent('Mail::GetServerByDomain', array($this, 'onGetServerByDomain'));
+		$this->subscribeEvent('GetMailDomains', [$this, 'onGetMailDomains']);
 		
 		\Aurora\Modules\Core\Classes\User::extend(
 			self::GetName(),
@@ -120,16 +121,8 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 */
 	public function GetDomains($TenantId = 0, $Offset = 0, $Limit = 0, $Search = '')
 	{
-		$oAuthenticatedUser = \Aurora\System\Api::getAuthenticatedUser();
-		if ($oAuthenticatedUser->Role === \Aurora\System\Enums\UserRole::TenantAdmin && $oAuthenticatedUser->IdTenant === $TenantId)
-		{
-			\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::TenantAdmin);
-		}
-		else
-		{
-			\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::SuperAdmin);
-		}
-		
+		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::Anonymous);
+
 		if ($TenantId === 0)
 		{
 			throw new \Aurora\System\Exceptions\ApiException(\Aurora\System\Notifications::InvalidInputParameter);
@@ -291,6 +284,20 @@ class Module extends \Aurora\System\Module\AbstractModule
 			else
 			{
 				$aArgs['Filters'] = [self::GetName() . '::DomainId' => [$aArgs['DomainId'], '=']];
+			}
+		}
+	}
+
+	public function onGetMailDomains($aArgs, &$mResult)
+	{
+		if (isset($aArgs['TenantId']))
+		{
+			$aDomains = $this->Decorator()->GetDomains($aArgs['TenantId']);
+			if (isset($aDomains['Items']))
+			{
+				$mResult = array_map(function ($oDomain) {
+					return $oDomain->Name;
+				}, $aDomains['Items']);
 			}
 		}
 	}

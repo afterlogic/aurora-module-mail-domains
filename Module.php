@@ -121,7 +121,15 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 */
 	public function GetDomains($TenantId = 0, $Offset = 0, $Limit = 0, $Search = '')
 	{
-		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::Anonymous);
+		$oAuthenticatedUser = \Aurora\System\Api::getAuthenticatedUser();
+		if ($oAuthenticatedUser->Role === \Aurora\System\Enums\UserRole::TenantAdmin && $oAuthenticatedUser->IdTenant === $TenantId)
+		{
+			\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::TenantAdmin);
+		}
+		else
+		{
+			\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::SuperAdmin);
+		}
 
 		if ($TenantId === 0)
 		{
@@ -129,7 +137,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 		}
 		
 		$aResult = [];
-		$aDomains = $this->getDomainsManager()->getDomains($TenantId, $Offset, $Limit, $Search);
+		$aDomains = $this->getDomainsManager()->getDomainsByTenantId($TenantId, $Offset, $Limit, $Search);
 		$iDomainsCount = $this->getDomainsManager()->getDomainsCount($TenantId, $Search);
 		foreach ($aDomains as $oDomain)
 		{
@@ -292,13 +300,17 @@ class Module extends \Aurora\System\Module\AbstractModule
 	{
 		if (isset($aArgs['TenantId']))
 		{
-			$aDomains = $this->Decorator()->GetDomains($aArgs['TenantId']);
-			if (isset($aDomains['Items']))
-			{
-				$mResult = array_map(function ($oDomain) {
-					return $oDomain->Name;
-				}, $aDomains['Items']);
-			}
+			$aDomains = $this->getDomainsManager()->getDomainsByTenantId($aArgs['TenantId']);
+			$mResult = array_map(function ($oDomain) {
+				return $oDomain->Name;
+			}, $aDomains);
+		}
+		else
+		{//get all domains for all tenants
+			$aDomains = $this->getDomainsManager()->getFullDomainsList();
+			$mResult = array_map(function ($oDomain) {
+				return $oDomain->Name;
+			}, $aDomains);
 		}
 	}
 }

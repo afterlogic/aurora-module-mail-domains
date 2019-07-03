@@ -80,7 +80,7 @@ class Manager extends \Aurora\System\Managers\AbstractManager
 	 * @param string $sSearch Search string.
 	 * @return array|boolean
 	 */
-	public function getDomains($iTenantId, $iOffset = 0, $iLimit = 0, $sSearch = '')
+	public function getDomainsByTenantId($iTenantId, $iOffset = 0, $iLimit = 0, $sSearch = '')
 	{
 		$aFilters = [
 			'TenantId' => [$iTenantId, '='],
@@ -99,7 +99,29 @@ class Manager extends \Aurora\System\Managers\AbstractManager
 			$iOrderType
 		);
 	}
-	
+
+	/**
+	 * Obtains all domains.
+	 * @param int $iOffset Offset of the list.
+	 * @param int $iLimit Limit of the list.
+	 * @return array|boolean
+	 */
+	public function getFullDomainsList($iOffset = 0, $iLimit = 0)
+	{
+		$sOrderBy = 'Name';
+		$iOrderType = \Aurora\System\Enums\SortOrder::ASC;
+
+		return $this->oEavManager->getEntities(
+			\Aurora\Modules\MailDomains\Classes\Domain::class,
+			array(),
+			$iOffset,
+			$iLimit,
+			[],
+			$sOrderBy,
+			$iOrderType
+		);
+	}
+
 	/**
 	 * Obtains all domains names for specified mail server.
 	 * @param int $iMailServerId Mail server identifier.

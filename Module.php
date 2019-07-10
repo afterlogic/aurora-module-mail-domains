@@ -35,7 +35,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 		
 		$this->subscribeEvent('Mail::UpdateServer::after', array($this, 'onAfterUpdateServer'));
 		$this->subscribeEvent('Mail::ServerToResponseArray', array($this, 'onServerToResponseArray'));
-		$this->subscribeEvent('Mail::GetServerByDomain', array($this, 'onGetServerByDomain'));
+		$this->subscribeEvent('Mail::GetMailServerByDomain::before', array($this, 'onBeforeGetMailServerByDomain'));
 		$this->subscribeEvent('GetMailDomains', [$this, 'onGetMailDomains']);
 		
 		\Aurora\Modules\Core\Classes\User::extend(
@@ -84,14 +84,28 @@ class Module extends \Aurora\System\Module\AbstractModule
 		return $mResult;
 	}
 	
-	public function onGetServerByDomain($aArgs, &$mResult)
+	public function onBeforeGetMailServerByDomain($aArgs, &$mResult)
 	{
-		$oTenant = \Aurora\System\Api::getTenantByWebDomain();
-		$oDomain = $this->getDomainsManager()->getDomainByName($aArgs['Domain'], $oTenant ? $oTenant->EntityId : 0);
-		if ($oDomain)
+		$mResult = [];
+
+		if (isset($aArgs['Domain']))
 		{
-			$mResult = $this->getServersManager()->getServer($oDomain->MailServerId);
+			$oTenant = \Aurora\System\Api::getTenantByWebDomain();
+			$oDomain = $this->getDomainsManager()->getDomainByName($aArgs['Domain'], $oTenant ? $oTenant->EntityId : 0);
+			if ($oDomain)
+			{
+				$oServer = $this->getServersManager()->getServer($oDomain->MailServerId);
+				if ($oServer instanceof \Aurora\Modules\Mail\Classes\Server)
+				{
+					$mResult = [
+						'Server'			=> $oServer,
+						'FoundWithWildcard'	=> false
+					];
+				}
+			}
 		}
+
+		return true; // break subscriptions to prevent returning servers from other modules
 	}
 	
 	public function onServerToResponseArray($aArgs, &$mResult)

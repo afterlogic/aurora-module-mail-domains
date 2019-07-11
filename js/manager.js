@@ -16,33 +16,32 @@ module.exports = function (oAppData) {
 	
 	Settings.init(oAppData);
 	
+	function ChangeAdminPanelUserEntityData()
+	{
+		ModulesManager.run('AdminPanelWebclient', 'changeAdminPanelEntityData', [{
+			Type: 'User',
+			EditView: require('modules/%ModuleName%/js/views/EditUserView.js'),
+			Filters: [
+				{
+					sEntity: 'Domain',
+					sField: 'DomainId',
+					mList: function () {
+						return _.map(Cache.domains(), function (oDomain) {
+							return {
+								text: oDomain.Name,
+								value: oDomain.Id
+							};
+						});
+					},
+					sAllText: TextUtils.i18n('%MODULENAME%/LABEL_ALL_DOMAINS'),
+					sNotInAnyText: TextUtils.i18n('%MODULENAME%/LABEL_NOT_IN_ANY_DOMAIN')
+				}
+			]
+		}]);
+	}
+
 	if (ModulesManager.isModuleAvailable(Settings.ServerModuleName))
 	{
-		
-		function ChangeAdminPanelUserEntityData()
-		{
-			ModulesManager.run('AdminPanelWebclient', 'changeAdminPanelEntityData', [{
-				Type: 'User',
-				EditView: require('modules/%ModuleName%/js/views/EditUserView.js'),
-				Filters: [
-					{
-						sEntity: 'Domain',
-						sField: 'DomainId',
-						mList: function () {
-							return _.map(Cache.domains(), function (oDomain) {
-								return {
-									text: oDomain.Name,
-									value: oDomain.Id
-								};
-							});
-						},
-						sAllText: TextUtils.i18n('%MODULENAME%/LABEL_ALL_DOMAINS'),
-						sNotInAnyText: TextUtils.i18n('%MODULENAME%/LABEL_NOT_IN_ANY_DOMAIN')
-					}
-				]
-			}]);
-		}
-		
 		if (App.getUserRole() === Enums.UserRole.SuperAdmin)
 		{
 			return {

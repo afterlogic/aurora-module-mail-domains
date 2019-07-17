@@ -101,6 +101,26 @@ class Manager extends \Aurora\System\Managers\AbstractManager
 	}
 
 	/**
+	 * Obtains all mail domains that belong to the specified mail server.
+	 * @param int $iMailServerId
+	 * @return Array|false
+	 */
+	public function getDomainsByMailServerId($iMailServerId)
+	{
+		$aFilters = [
+			'MailServerId' => [$iMailServerId, '=']
+		];
+		
+		return $this->oEavManager->getEntities(
+			\Aurora\Modules\MailDomains\Classes\Domain::class,
+			array(),
+			0,
+			0,
+			$aFilters
+		);
+	}
+	
+	/**
 	 * Obtains all domains.
 	 * @param int $iOffset Offset of the list.
 	 * @param int $iLimit Limit of the list.

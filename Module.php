@@ -34,6 +34,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 		$this->subscribeEvent('Core::DeleteTenant::after', array($this, 'onAfterDeleteTenant'));
 		
 		$this->subscribeEvent('Mail::UpdateServer::after', array($this, 'onAfterUpdateServer'));
+		$this->subscribeEvent('Mail::DeleteServer::before', array($this, 'onBeforeDeleteServer'));
 		$this->subscribeEvent('Mail::ServerToResponseArray', array($this, 'onServerToResponseArray'));
 		$this->subscribeEvent('Mail::GetMailServerByDomain::before', array($this, 'onBeforeGetMailServerByDomain'));
 		$this->subscribeEvent('GetMailDomains', [$this, 'onGetMailDomains']);
@@ -267,6 +268,23 @@ class Module extends \Aurora\System\Module\AbstractModule
 		{
 			$oServer->Domains = '';
 			$this->getServersManager()->updateServer($oServer);
+		}
+	}
+	
+	/**
+	 * Removes all mail domains that belong to the specified mail server.
+	 * @param array $aArgs
+	 * @param mixed $mResult
+	 */
+	public function onBeforeDeleteServer($aArgs, &$mResult)
+	{
+		$mDomains = $this->getDomainsManager()->getDomainsByMailServerId($aArgs['ServerId']);
+		if (is_array($mDomains))
+		{
+			foreach ($mDomains as $oDomain)
+			{
+				$this->Decorator()->DeleteDomains($oDomain->TenantId, [$oDomain->EntityId]);
+			}
 		}
 	}
 	

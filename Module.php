@@ -27,9 +27,9 @@ class Module extends \Aurora\System\Module\AbstractModule
 			Enums\ErrorCodes::DomainExists	=> $this->i18N('ERROR_DOMAIN_EXISTS')
 		];
 
-		$this->subscribeEvent('AdminPanelWebclient::GetEntityList::before', array($this, 'onBeforeGetEntityList'));
-		$this->subscribeEvent('AdminPanelWebclient::CreateUser::after', array($this, 'onAfterAdminPanelCreateUser'));
-		
+		$this->subscribeEvent('AdminPanelWebclient::GetEntityList::before', array($this, 'onBeforeGetEntityList')); /** @deprecated since version 8.3.7 **/
+		$this->subscribeEvent('Core::GetUsers::before', array($this, 'onBeforeGetUsers'));
+		$this->subscribeEvent('AdminPanelWebclient::CreateUser::after', array($this, 'onAfterAdminPanelCreateUser')); /** @deprecated since version 8.3.7 **/
 		$this->subscribeEvent('Core::CreateUser::after', array($this, 'onAfterCreateUser'));
 		$this->subscribeEvent('Core::DeleteTenant::after', array($this, 'onAfterDeleteTenant'));
 		
@@ -73,7 +73,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::SuperAdmin);
 		
-		$oTenant = \Aurora\Modules\Core\Module::Decorator()->GetTenantById($TenantId);
+		$oTenant = \Aurora\Modules\Core\Module::Decorator()->GetTenantUnchecked($TenantId);
 		$oServer = $this->getServersManager()->getServer($MailServerId);
 		if (!$oTenant || !$oServer || $DomainName === '')
 		{
@@ -210,27 +210,12 @@ class Module extends \Aurora\System\Module\AbstractModule
 		return $mResult;
 	}
 	
+	/**
+	 * @deprecated since version 8.3.7
+	 */
 	public function onAfterAdminPanelCreateUser(&$aData, &$mResult)
 	{
-		$oUser = \Aurora\System\Api::getUserById($mResult);
-		$oDomain = $oUser ? $this->getDomainsManager()->getDomain($oUser->{self::GetName() . '::DomainId'}) : null;
-		$oServer = $oDomain ? $this->getServersManager()->getServer($oDomain->MailServerId) : null;
-		if ($oServer)
-		{
-			try
-			{
-				\Aurora\Modules\Mail\Module::Decorator()->CreateAccount($oUser->EntityId, '', $aData['PublicId'], $aData['PublicId'], $aData['Password'], $oServer->toResponseArray());
-			}
-			catch(\Exception $oException)
-			{
-				\Aurora\Modules\Core\Module::Decorator()->DeleteUser($oUser->EntityId);
-				throw $oException;
-			}
-		}
-		else
-		{
-			\Aurora\Modules\Core\Module::Decorator()->DeleteUser($oUser->EntityId);
-		}
+		$this->onAfterCreateUser($aData, $mResult);
 	}
 	
 	public function onAfterCreateUser(&$aData, &$mResult)
@@ -244,6 +229,27 @@ class Module extends \Aurora\System\Module\AbstractModule
 			$oUser->{self::GetName() . '::DomainId'} = $oDomain->EntityId;
 			$oUser->IdTenant = $oDomain->TenantId;
 			\Aurora\Modules\Core\Module::Decorator()->UpdateUserObject($oUser);
+		}
+		
+		if (isset($aData['Password']))
+		{
+			$oServer = $oDomain ? $this->getServersManager()->getServer($oDomain->MailServerId) : null;
+			if ($oServer)
+			{
+				try
+				{
+					\Aurora\Modules\Mail\Module::Decorator()->CreateAccount($oUser->EntityId, '', $aData['PublicId'], $aData['PublicId'], $aData['Password'], $oServer->toResponseArray());
+				}
+				catch(\Exception $oException)
+				{
+					\Aurora\Modules\Core\Module::Decorator()->DeleteUser($oUser->EntityId);
+					throw $oException;
+				}
+			}
+			else
+			{
+				\Aurora\Modules\Core\Module::Decorator()->DeleteUser($oUser->EntityId);
+			}
 		}
 	}
 	
@@ -283,7 +289,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 		{
 			foreach ($mDomains as $oDomain)
 			{
-				$this->Decorator()->DeleteDomains($oDomain->TenantId, [$oDomain->EntityId]);
+				self::Decorator()->DeleteDomains($oDomain->TenantId, [$oDomain->EntityId]);
 			}
 		}
 	}
@@ -292,7 +298,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	{
 		$TenantId = $aArgs['TenantId'];
 		
-		$aDomains = $this->Decorator()->GetDomains($TenantId);
+		$aDomains = self::Decorator()->GetDomains($TenantId);
 		$aDomainIds = [];
 		if (isset($aDomains['Items']) && is_array($aDomains['Items']))
 		{
@@ -306,13 +312,24 @@ class Module extends \Aurora\System\Module\AbstractModule
 		}
 		if (count($aDomainIds))
 		{
-			$this->Decorator()->DeleteDomains($TenantId, $aDomainIds);
+			self::Decorator()->DeleteDomains($TenantId, $aDomainIds);
+		}
+	}
+	
+	/**
+	 * @deprecated since version 8.3.7
+	 */
+	public function onBeforeGetEntityList(&$aArgs, &$mResult)
+	{
+		if ($aArgs['Type'] === 'User')
+		{
+			$this->onBeforeGetUsers($aArgs, $mResult);
 		}
 	}
 
-	public function onBeforeGetEntityList(&$aArgs, &$mResult)
+	public function onBeforeGetUsers(&$aArgs, &$mResult)
 	{
-		if ($aArgs['Type'] === 'User' && isset($aArgs['DomainId']) && $aArgs['DomainId'] !== -1)
+		if (isset($aArgs['DomainId']) && $aArgs['DomainId'] !== -1)
 		{
 			if (isset($aArgs['Filters']) && is_array($aArgs['Filters']) && count($aArgs['Filters']) > 0)
 			{

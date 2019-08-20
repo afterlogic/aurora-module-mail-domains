@@ -28,7 +28,8 @@ function CCache()
 		this.selectedTenantId.subscribe(function () {
 			if (typeof this.domainsByTenants()[this.selectedTenantId()] === 'undefined')
 			{
-				Ajax.send(Settings.ServerModuleName, 'GetDomains');
+				console.log('this.selectedTenantId()', this.selectedTenantId());
+				Ajax.send(Settings.ServerModuleName, 'GetDomains', {TenantId: this.selectedTenantId()});
 			}
 		}, this);
 	}

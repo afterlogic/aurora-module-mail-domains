@@ -59,8 +59,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	
 	protected function getServersManager()
 	{
-		$oMailModule = \Aurora\System\Api::GetModule('Mail');
-		return $oMailModule->getServersManager();
+		return \Aurora\Modules\Mail\Module::getInstance()->getServersManager();
 	}
 
 	/**
@@ -137,7 +136,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	public function GetDomains($TenantId = 0, $Offset = 0, $Limit = 0, $Search = '')
 	{
 		$oAuthenticatedUser = \Aurora\System\Api::getAuthenticatedUser();
-		if ($oAuthenticatedUser->Role === \Aurora\System\Enums\UserRole::TenantAdmin && $oAuthenticatedUser->IdTenant === $TenantId)
+		if ($oAuthenticatedUser instanceof \Aurora\Modules\Core\Classes\User && $oAuthenticatedUser->Role === \Aurora\System\Enums\UserRole::TenantAdmin && $oAuthenticatedUser->IdTenant === $TenantId)
 		{
 			\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::TenantAdmin);
 		}
@@ -156,7 +155,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 		$iDomainsCount = $this->getDomainsManager()->getDomainsCount($TenantId, $Search);
 		foreach ($aDomains as $oDomain)
 		{
-			$oDomain->Count = \Aurora\Modules\Core\Module::Decorator()->getUsersManager()->getUsersCount('', [self::GetName() . '::DomainId' => $oDomain->EntityId]);
+			$oDomain->Count = \Aurora\Modules\Core\Module::getInstance()->getUsersManager()->getUsersCount('', [self::GetName() . '::DomainId' => $oDomain->EntityId]);
 			$aResult[] = $oDomain;
 		}
 		if (is_array($aDomains))

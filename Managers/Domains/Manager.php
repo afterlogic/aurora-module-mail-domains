@@ -7,6 +7,8 @@
 
 namespace Aurora\Modules\MailDomains\Managers\Domains;
 
+use Aurora\System\Enums\SortOrder;
+
 /**
  * @license https://www.gnu.org/licenses/agpl-3.0.html AGPL-3.0
  * @license https://afterlogic.com/products/common-licensing Afterlogic Software License
@@ -82,22 +84,16 @@ class Manager extends \Aurora\System\Managers\AbstractManager
 	 */
 	public function getDomainsByTenantId($iTenantId, $iOffset = 0, $iLimit = 0, $sSearch = '')
 	{
-		$aFilters = [
-			'TenantId' => [$iTenantId, '='],
-			'Name' => ['%' . $sSearch . '%', 'LIKE']
-		];
-		$sOrderBy = 'Name';
-		$iOrderType = \Aurora\System\Enums\SortOrder::ASC;
-		
-		return $this->oEavManager->getEntities(
-			\Aurora\Modules\MailDomains\Classes\Domain::class,
-			array(),
-			$iOffset,
-			$iLimit,
-			$aFilters,
-			$sOrderBy,
-			$iOrderType
-		);
+		return (new \Aurora\System\EAV\Query(\Aurora\Modules\MailDomains\Classes\Domain::class))
+			->where([
+				'TenantId' => [$iTenantId, '='],
+				'Name' => ['%' . $sSearch . '%', 'LIKE']
+			])
+			->orderBy('Name')
+			->sortOrder(\Aurora\System\Enums\SortOrder::ASC)
+			->limit($iLimit)
+			->offset($iOffset)
+			->exec();			
 	}
 
 	/**
@@ -107,17 +103,9 @@ class Manager extends \Aurora\System\Managers\AbstractManager
 	 */
 	public function getDomainsByMailServerId($iMailServerId)
 	{
-		$aFilters = [
-			'MailServerId' => [$iMailServerId, '=']
-		];
-		
-		return $this->oEavManager->getEntities(
-			\Aurora\Modules\MailDomains\Classes\Domain::class,
-			array(),
-			0,
-			0,
-			$aFilters
-		);
+		return (new \Aurora\System\EAV\Query(\Aurora\Modules\MailDomains\Classes\Domain::class))
+			->where(['MailServerId' => [$iMailServerId, '=']])
+			->exec();	
 	}
 	
 	/**
@@ -128,18 +116,12 @@ class Manager extends \Aurora\System\Managers\AbstractManager
 	 */
 	public function getFullDomainsList($iOffset = 0, $iLimit = 0)
 	{
-		$sOrderBy = 'Name';
-		$iOrderType = \Aurora\System\Enums\SortOrder::ASC;
-
-		return $this->oEavManager->getEntities(
-			\Aurora\Modules\MailDomains\Classes\Domain::class,
-			array(),
-			$iOffset,
-			$iLimit,
-			[],
-			$sOrderBy,
-			$iOrderType
-		);
+		return (new \Aurora\System\EAV\Query(\Aurora\Modules\MailDomains\Classes\Domain::class))
+			->orderBy('Name')
+			->sortOrder(\Aurora\System\Enums\SortOrder::ASC)
+			->limit($iLimit)
+			->offset($iOffset)
+			->exec();	
 	}
 
 	/**
@@ -149,27 +131,16 @@ class Manager extends \Aurora\System\Managers\AbstractManager
 	 */
 	public function getDomainsNames($iMailServerId)
 	{
-		$iOffset = 0;
-		$iLimit = 0;
-		$aFilters = ['MailServerId' => [$iMailServerId, '=']];
-		$sOrderBy = 'Name';
-		$iOrderType = \Aurora\System\Enums\SortOrder::ASC;
-		
-		$aDomains = $this->oEavManager->getEntities(
-			\Aurora\Modules\MailDomains\Classes\Domain::class,
-			array('Name'),
-			$iOffset,
-			$iLimit,
-			$aFilters,
-			$sOrderBy,
-			$iOrderType
-		);
-		$aDomainsNames = [];
-		foreach ($aDomains as $oDomain)
-		{
-			$aDomainsNames[] = $oDomain->Name;
-		}
-		return $aDomainsNames;
+		$aDomains = (new \Aurora\System\EAV\Query(\Aurora\Modules\MailDomains\Classes\Domain::class))
+			->select(['Name'])
+			->where(['MailServerId' => [$iMailServerId, '=']])
+			->orderBy('Name')
+			->sortOrder(\Aurora\System\Enums\SortOrder::ASC)
+			->exec();	
+
+		return array_map(function ($oDomain) {
+			return $oDomain->Name;
+		}, $aDomains);
 	}
 	
 	/**
@@ -206,8 +177,6 @@ class Manager extends \Aurora\System\Managers\AbstractManager
 	 */
 	public function getDomainByName($sDomainName, $iTenantId)
 	{
-		$iOffset = 0;
-		$iLimit = 0;
 		$aFilters = [];
 		if ($iTenantId === 0)
 		{
@@ -220,19 +189,12 @@ class Manager extends \Aurora\System\Managers\AbstractManager
 				'Name' => [$sDomainName, '=']
 			]];
 		}
-		$sOrderBy = 'Name';
-		$iOrderType = \Aurora\System\Enums\SortOrder::ASC;
-		
-		$aDomains = $this->oEavManager->getEntities(
-			\Aurora\Modules\MailDomains\Classes\Domain::class,
-			array(),
-			$iOffset,
-			$iLimit,
-			$aFilters,
-			$sOrderBy,
-			$iOrderType
-		);
-		
-		return count($aDomains) > 0 ? $aDomains[0] : false;
+
+		return (new \Aurora\System\EAV\Query(\Aurora\Modules\MailDomains\Classes\Domain::class))
+			->where($aFilters)
+			->orderBy('Name')
+			->sortOrder(\Aurora\System\Enums\SortOrder::ASC)
+			->one()
+			->exec();			
 	}
 }

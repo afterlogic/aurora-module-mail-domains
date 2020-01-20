@@ -74,12 +74,12 @@ class Module extends \Aurora\System\Module\AbstractModule
 		
 		$oTenant = \Aurora\Modules\Core\Module::Decorator()->GetTenantUnchecked($TenantId);
 		$oServer = $this->getServersManager()->getServer($MailServerId);
-		if (!$oTenant || !$oServer || $DomainName === '')
+		if (!$oTenant || !$oServer || \trim($DomainName) === '')
 		{
 			throw new \Aurora\System\Exceptions\ApiException(\Aurora\System\Notifications::InvalidInputParameter);
 		}
 		
-		$mResult = $this->getDomainsManager()->createDomain($TenantId, $MailServerId, $DomainName);
+		$mResult = $this->getDomainsManager()->createDomain($TenantId, $MailServerId, \trim($DomainName));
 
 		return $mResult;
 	}
@@ -156,6 +156,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 		foreach ($aDomains as $oDomain)
 		{
 			$oDomain->Count = \Aurora\Modules\Core\Module::getInstance()->getUsersManager()->getUsersCount('', [self::GetName() . '::DomainId' => $oDomain->EntityId]);
+			$oDomain->Name = \trim($oDomain->Name);
 			$aResult[] = $oDomain;
 		}
 		if (is_array($aDomains))

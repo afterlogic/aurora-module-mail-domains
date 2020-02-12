@@ -101,10 +101,16 @@ class Manager extends \Aurora\System\Managers\AbstractManager
 	 * @param int $iMailServerId
 	 * @return Array|false
 	 */
-	public function getDomainsByMailServerId($iMailServerId)
+	public function getDomainsByMailServerId($iMailServerId, $iTenantId = null)
 	{
+		$aWhere = ['MailServerId' => [$iMailServerId, '=']];
+		if (is_numeric($iTenantId))
+		{
+			$aWhere['TenantId'] = [$iTenantId, '='];
+		}
+
 		return (new \Aurora\System\EAV\Query(\Aurora\Modules\MailDomains\Classes\Domain::class))
-			->where(['MailServerId' => [$iMailServerId, '=']])
+			->where($aWhere)
 			->exec();	
 	}
 	

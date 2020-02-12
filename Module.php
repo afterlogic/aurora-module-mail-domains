@@ -38,6 +38,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 		$this->subscribeEvent('Mail::ServerToResponseArray', array($this, 'onServerToResponseArray'));
 		$this->subscribeEvent('Mail::GetMailServerByDomain::before', array($this, 'onBeforeGetMailServerByDomain'));
 		$this->subscribeEvent('GetMailDomains', [$this, 'onGetMailDomains']);
+		$this->subscribeEvent('Mail::GetServerDomains::after', [$this, 'onAfterGetMailDomains']);
 		
 		\Aurora\Modules\Core\Classes\User::extend(
 			self::GetName(),
@@ -83,7 +84,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 
 		return $mResult;
 	}
-	
+
 	public function onBeforeGetMailServerByDomain($aArgs, &$mResult)
 	{
 		$mResult = [];
@@ -357,6 +358,18 @@ class Module extends \Aurora\System\Module\AbstractModule
 		else
 		{//get all domains for all tenants
 			$aDomains = $this->getDomainsManager()->getFullDomainsList();
+			$mResult = array_map(function ($oDomain) {
+				return $oDomain->Name;
+			}, $aDomains);
+		}
+	}
+
+
+	public function onAfterGetMailDomains($aArgs, &$mResult)
+	{
+		if (isset($aArgs['ServerId']))
+		{
+			$aDomains = $this->getDomainsManager()->getDomainsByMailServerId($aArgs['ServerId'], isset($aArgs['TenantId']) ? $aArgs['TenantId'] : null);
 			$mResult = array_map(function ($oDomain) {
 				return $oDomain->Name;
 			}, $aDomains);

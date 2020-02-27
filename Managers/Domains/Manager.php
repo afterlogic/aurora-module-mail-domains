@@ -133,13 +133,19 @@ class Manager extends \Aurora\System\Managers\AbstractManager
 	/**
 	 * Obtains all domains names for specified mail server.
 	 * @param int $iMailServerId Mail server identifier.
+	 * @param int $iTenantId Tenant identifier.
 	 * @return array|boolean
 	 */
-	public function getDomainsNames($iMailServerId)
+	public function getDomainsNames($iMailServerId, $iTenantId = null)
 	{
+		$aWhere = ['MailServerId' => [$iMailServerId, '=']];
+		if (is_numeric($iTenantId))
+		{
+			$aWhere['TenantId'] = [$iTenantId, '='];
+		}
 		$aDomains = (new \Aurora\System\EAV\Query(\Aurora\Modules\MailDomains\Classes\Domain::class))
 			->select(['Name'])
-			->where(['MailServerId' => [$iMailServerId, '=']])
+			->where($aWhere)
 			->orderBy('Name')
 			->sortOrder(\Aurora\System\Enums\SortOrder::ASC)
 			->exec();	

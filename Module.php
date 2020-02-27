@@ -111,12 +111,21 @@ class Module extends \Aurora\System\Module\AbstractModule
 	
 	public function onServerToResponseArray($aArgs, &$mResult)
 	{
+		$iTenantId = null;
+		$oAuthenticatedUser = \Aurora\System\Api::getAuthenticatedUser();
+		if ($oAuthenticatedUser instanceof \Aurora\Modules\Core\Classes\User)
+		{
+			if ($oAuthenticatedUser->Role === \Aurora\System\Enums\UserRole::NormalUser || $oAuthenticatedUser->Role === \Aurora\System\Enums\UserRole::TenantAdmin)
+			{
+				$iTenantId = $oAuthenticatedUser->IdTenant;
+			}
+		}
 		if (is_array($mResult))
 		{
 			// $mResult['AllowToDelete']
 			$mResult['AllowEditDomains'] = false;
 			
-			$aDomains = $this->getDomainsManager()->getDomainsNames($mResult['EntityId']);
+			$aDomains = $this->getDomainsManager()->getDomainsNames($mResult['EntityId'], $iTenantId);
 			$sDomains = join("\r\n", $aDomains);
 			if (strpos($mResult['Domains'], '*') !== false)
 			{

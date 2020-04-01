@@ -110,7 +110,8 @@ CEditUserView.prototype.getParametersForSave = function ()
 			PublicId: $.trim(this.publicId()) + sDomain,
 			DomainId: this.selectedDomain() ? this.selectedDomain().Id : 0,
 			Role: this.tenantAdminSelected() ? Enums.UserRole.TenantAdmin : Enums.UserRole.NormalUser,
-			WriteSeparateLog: this.writeSeparateLog()
+			WriteSeparateLog: this.writeSeparateLog(),
+			Forced: true
 		}
 	;
 

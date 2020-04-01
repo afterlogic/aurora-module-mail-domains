@@ -86,8 +86,10 @@ class Manager extends \Aurora\System\Managers\AbstractManager
 	{
 		return (new \Aurora\System\EAV\Query(\Aurora\Modules\MailDomains\Classes\Domain::class))
 			->where([
-				'TenantId' => [$iTenantId, '='],
-				'Name' => ['%' . $sSearch . '%', 'LIKE']
+				'$AND' => [
+					'TenantId' => [$iTenantId, '='],
+					'Name' => ['%' . $sSearch . '%', 'LIKE']
+				]
 			])
 			->orderBy('Name')
 			->sortOrder(\Aurora\System\Enums\SortOrder::ASC)

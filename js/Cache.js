@@ -30,6 +30,7 @@ function CCache()
 			{
 				Ajax.send(Settings.ServerModuleName, 'GetDomains', {TenantId: this.selectedTenantId()});
 			}
+			this.init();
 		}, this);
 	}
 	this.domains = ko.computed(function () {
@@ -49,7 +50,18 @@ function CCache()
 
 CCache.prototype.init = function ()
 {
-	Ajax.send('Mail', 'GetServers');
+	Ajax.send('Mail', 'GetServers', {TenantId: this.selectedTenantId()}, function (oResponse, oRequest) {
+		if (oResponse && oResponse.Module === 'Mail' && oResponse.Method === 'GetServers' && _.isArray(oResponse.Result && oResponse.Result.Items))
+		{
+			this.mailServers(_.map(oResponse.Result.Items, function (oServerData) {
+				return {
+					Name: oServerData.Name,
+					EntityId: oServerData.EntityId,
+					TenantId: oServerData.TenantId
+				};
+			}));
+		}
+	}, this);
 };
 
 /**
@@ -145,17 +157,6 @@ CCache.prototype.onAjaxResponse = function (oParams)
 			this.domainsByTenants()[iTenantId] = aDomains;
 			this.domainsByTenants.valueHasMutated();
 		}
-	}
-	
-	if (oParams.Response.Module === 'Mail' && oParams.Response.Method === 'GetServers')
-	{
-		this.mailServers(_.map(oParams.Response.Result, function (oServerData) {
-			return {
-				Name: oServerData.Name,
-				EntityId: oServerData.EntityId,
-				TenantId: oServerData.TenantId
-			};
-		}));
 	}
 };
 

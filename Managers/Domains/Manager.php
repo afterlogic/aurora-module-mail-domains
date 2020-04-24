@@ -178,7 +178,7 @@ class Manager extends \Aurora\System\Managers\AbstractManager
 		$oDomain = $this->getDomain($iDomainId);
 		if ($oDomain)
 		{
-			$bResult = $this->oEavManager->deleteEntity($iDomainId);
+			$bResult = $this->oEavManager->deleteEntity($iDomainId, \Aurora\Modules\MailDomains\Classes\Domain::class);
 		}
 		return $bResult;
 	}

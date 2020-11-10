@@ -51,9 +51,10 @@ function CCache()
 CCache.prototype.init = function ()
 {
 	Ajax.send('Mail', 'GetServers', {TenantId: this.selectedTenantId()}, function (oResponse, oRequest) {
-		if (oResponse && oResponse.Module === 'Mail' && oResponse.Method === 'GetServers' && _.isArray(oResponse.Result && oResponse.Result.Items))
+		var aItems = oResponse && oResponse.Result && oResponse.Result.Items;
+		if (_.isArray(aItems))
 		{
-			this.mailServers(_.map(oResponse.Result.Items, function (oServerData) {
+			this.mailServers(_.map(aItems, function (oServerData) {
 				return {
 					Name: oServerData.Name,
 					EntityId: oServerData.EntityId,
@@ -137,7 +138,12 @@ CCache.prototype.onAjaxSend = function (oParams)
 
 CCache.prototype.onAjaxResponse = function (oParams)
 {
-	if (oParams.Response.Module === Settings.ServerModuleName && oParams.Response.Method === 'GetDomains')
+	var
+		sModule = oParams.Response.Module,
+		sMethod = oParams.Response.Method
+	;
+	
+	if (sModule === Settings.ServerModuleName && sMethod === 'GetDomains')
 	{
 		var
 			sSearch = Types.pString(oParams.Request.Parameters.Search),
@@ -157,6 +163,11 @@ CCache.prototype.onAjaxResponse = function (oParams)
 			this.domainsByTenants()[iTenantId] = aDomains;
 			this.domainsByTenants.valueHasMutated();
 		}
+	}
+	
+	if (sModule === 'Mail' && (sMethod === 'CreateServer' || sMethod === 'UpdateServer' || sMethod === 'DeleteServer'))
+	{
+		this.init();
 	}
 };
 

@@ -16,11 +16,11 @@ namespace Aurora\Modules\MailDomains;
  */
 class Module extends \Aurora\System\Module\AbstractModule
 {
-	/* 
+	/*
 	 * @var $oApiDomainsManager Managers\MailingLists
 	 */
 	public $oApiDomainsManager = null;
-			
+
 	public function init()
 	{
 		$this->aErrors = [
@@ -32,22 +32,22 @@ class Module extends \Aurora\System\Module\AbstractModule
 		$this->subscribeEvent('AdminPanelWebclient::CreateUser::after', array($this, 'onAfterAdminPanelCreateUser')); /** @deprecated since version 8.3.7 **/
 		$this->subscribeEvent('Core::CreateUser::after', array($this, 'onAfterCreateUser'));
 		$this->subscribeEvent('Core::DeleteTenant::after', array($this, 'onAfterDeleteTenant'));
-		
+
 		$this->subscribeEvent('Mail::UpdateServer::after', array($this, 'onAfterUpdateServer'));
 		$this->subscribeEvent('Mail::DeleteServer::before', array($this, 'onBeforeDeleteServer'));
 		$this->subscribeEvent('Mail::ServerToResponseArray', array($this, 'onServerToResponseArray'));
 		$this->subscribeEvent('Mail::GetMailServerByDomain::before', array($this, 'onBeforeGetMailServerByDomain'));
 		$this->subscribeEvent('GetMailDomains', [$this, 'onGetMailDomains']);
 		$this->subscribeEvent('Mail::GetServerDomains::after', [$this, 'onAfterGetMailDomains']);
-		
+
 		\Aurora\Modules\Core\Classes\User::extend(
 			self::GetName(),
 			[
 				'DomainId' => array('int', 0, true)
 			]
-		);		
+		);
 	}
-	
+
 	public function getDomainsManager()
 	{
 		if ($this->oApiDomainsManager === null)
@@ -57,7 +57,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 
 		return $this->oApiDomainsManager;
 	}
-	
+
 	protected function getServersManager()
 	{
 		return \Aurora\Modules\Mail\Module::getInstance()->getServersManager();
@@ -72,14 +72,14 @@ class Module extends \Aurora\System\Module\AbstractModule
 	public function CreateDomain($TenantId = 0, $MailServerId = 0, $DomainName = '')
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::SuperAdmin);
-		
+
 		$oTenant = \Aurora\Modules\Core\Module::Decorator()->GetTenantUnchecked($TenantId);
 		$oServer = $this->getServersManager()->getServer($MailServerId);
 		if (!$oTenant || !$oServer || \trim($DomainName) === '')
 		{
 			throw new \Aurora\System\Exceptions\ApiException(\Aurora\System\Notifications::InvalidInputParameter);
 		}
-		
+
 		$mResult = $this->getDomainsManager()->createDomain($TenantId, $MailServerId, \trim($DomainName));
 
 		return $mResult;
@@ -108,7 +108,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 
 		return true; // break subscriptions to prevent returning servers from other modules
 	}
-	
+
 	public function onServerToResponseArray($aArgs, &$mResult)
 	{
 		$iTenantId = null;
@@ -124,7 +124,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 		{
 			// $mResult['AllowToDelete']
 			$mResult['AllowEditDomains'] = false;
-			
+
 			$aDomains = $this->getDomainsManager()->getDomainsNames($mResult['EntityId'], $iTenantId);
 			$sDomains = join("\r\n", $aDomains);
 			if (strpos($mResult['Domains'], '*') !== false)
@@ -134,7 +134,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 			$mResult['Domains'] = $sDomains;
 		}
 	}
-	
+
 	/**
 	 * Obtains all domains for specified tenant.
 	 * @param int $TenantId Tenant identifier.
@@ -159,7 +159,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 		{
 			throw new \Aurora\System\Exceptions\ApiException(\Aurora\System\Notifications::InvalidInputParameter);
 		}
-		
+
 		$aResult = [];
 		$aDomains = $this->getDomainsManager()->getDomainsByTenantId($TenantId, $Offset, $Limit, $Search);
 		$iDomainsCount = $this->getDomainsManager()->getDomainsCount($TenantId, $Search);
@@ -176,10 +176,10 @@ class Module extends \Aurora\System\Module\AbstractModule
 				'Items' => $aResult
 			];
 		}
-		
+
 		return false;
 	}
-	
+
 	/**
 	 * Obtains domain.
 	 * @param int $Id Domain identifier.
@@ -188,13 +188,13 @@ class Module extends \Aurora\System\Module\AbstractModule
 	public function GetDomain($Id)
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::SuperAdmin);
-		
+
 		$oDomain = $this->getDomainsManager()->getDomain($Id);
 		$oDomain->Count = \Aurora\Modules\Core\Module::Decorator()->getUsersManager()->getUsersCount('', [self::GetName() . '::DomainId' => $Id]);
-		
+
 		return $oDomain;
 	}
-	
+
 	/**
 	 * Deletes domains.
 	 * @param int $TenantId Identifier of tenant which contains domains from list.
@@ -209,17 +209,17 @@ class Module extends \Aurora\System\Module\AbstractModule
 		{
 			// delete domain users
 			$aUsers = \Aurora\Modules\Core\Module::Decorator()->getUsersManager()->getUserList(0, 0, 'PublicId', \Aurora\System\Enums\SortOrder::ASC, '', [self::GetName() . '::DomainId' => $iDomainId]);
-			foreach ($aUsers as $oUser)
+			foreach ($aUsers as $aUser)
 			{
-				\Aurora\Modules\Core\Module::Decorator()->DeleteUser($oUser->EntityId);
+				\Aurora\Modules\Core\Module::Decorator()->DeleteUser($aUser['EntityId']);
 			}
-			
+
 			// delete domain
 			$mResult = $this->getDomainsManager()->deleteDomain($iDomainId);
 		}
 		return $mResult;
 	}
-	
+
 	/**
 	 * @deprecated since version 8.3.7
 	 */
@@ -227,7 +227,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	{
 		$this->onAfterCreateUser($aData, $mResult);
 	}
-	
+
 	public function onAfterCreateUser(&$aData, &$mResult)
 	{
 		$sEmail = isset($aData['PublicId']) ? $aData['PublicId'] : '';
@@ -240,7 +240,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 			$oUser->IdTenant = $oDomain->TenantId;
 			\Aurora\Modules\Core\Module::Decorator()->UpdateUserObject($oUser);
 		}
-		
+
 		if (isset($aData['Password']))
 		{
 			$oServer = $oDomain ? $this->getServersManager()->getServer($oDomain->MailServerId) : null;
@@ -262,12 +262,12 @@ class Module extends \Aurora\System\Module\AbstractModule
 			}
 		}
 	}
-	
+
 	public function onAfterUpdateServer($aArgs, &$mResult)
 	{
 		$iServerId = $aArgs['ServerId'];
 		$iTenantId = $aArgs['TenantId'];
-		
+
 		$oServer = $this->getServersManager()->getServer($iServerId);
 
 		if ($oServer->OwnerType === \Aurora\Modules\Mail\Enums\ServerOwnerType::SuperAdmin)
@@ -278,15 +278,15 @@ class Module extends \Aurora\System\Module\AbstractModule
 		{
 			\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::TenantAdmin);
 		}
-		
-		if ($oServer && ($oServer->OwnerType === \Aurora\Modules\Mail\Enums\ServerOwnerType::SuperAdmin || 
+
+		if ($oServer && ($oServer->OwnerType === \Aurora\Modules\Mail\Enums\ServerOwnerType::SuperAdmin ||
 				$oServer->OwnerType === \Aurora\Modules\Mail\Enums\ServerOwnerType::Tenant && $oServer->TenantId === $iTenantId))
 		{
 			$oServer->Domains = '';
 			$this->getServersManager()->updateServer($oServer);
 		}
 	}
-	
+
 	/**
 	 * Removes all mail domains that belong to the specified mail server.
 	 * @param array $aArgs
@@ -303,11 +303,11 @@ class Module extends \Aurora\System\Module\AbstractModule
 			}
 		}
 	}
-	
+
 	public function onAfterDeleteTenant($aArgs, &$mResult)
 	{
 		$TenantId = $aArgs['TenantId'];
-		
+
 		$aDomains = self::Decorator()->GetDomains($TenantId);
 		$aDomainIds = [];
 		if (isset($aDomains['Items']) && is_array($aDomains['Items']))
@@ -325,7 +325,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 			self::Decorator()->DeleteDomains($TenantId, $aDomainIds);
 		}
 	}
-	
+
 	/**
 	 * @deprecated since version 8.3.7
 	 */

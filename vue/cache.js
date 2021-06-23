@@ -8,6 +8,7 @@ import webApi from 'src/utils/web-api'
 import DomainModel from 'src/../../../MailDomains/vue/classes/domain'
 
 const allDomains = {}
+let currentDomains = []
 
 export default {
   getDomains (tenantId) {
@@ -40,6 +41,44 @@ export default {
           resolve({ domains: [], totalCount: 0, tenantId })
         })
       }
+    })
+  },
+
+  getPagedDomains (tenantId, search, page, limit) {
+    return new Promise((resolve, reject) => {
+      webApi.sendRequest({
+        moduleName: 'MailDomains',
+        methodName: 'GetDomains',
+        parameters: {
+          TenantId: tenantId,
+          Search: search,
+          Offset: limit * (page - 1),
+          Limit: limit,
+        },
+      }).then(result => {
+        if (_.isArray(result?.Items)) {
+          const domains = _.map(result.Items, function (data) {
+            return new DomainModel(data)
+          })
+          const totalCount = typesUtils.pInt(result.Count)
+          currentDomains = domains
+          resolve({ domains, totalCount, tenantId, search, page, limit })
+        } else {
+          resolve({ domains: [], totalCount: 0, tenantId, search, page, limit })
+        }
+      }, response => {
+        notification.showError(errors.getTextFromResponse(response))
+        resolve({ domains: [], totalCount: 0, tenantId, search, page, limit })
+      })
+    })
+  },
+
+  getDomain (tenantId, domainId) {
+    return new Promise((resolve, reject) => {
+      const domain = currentDomains.find(domain => {
+        return domain.tenantId === tenantId && domain.id === domainId
+      })
+      resolve({ domain, domainId })
     })
   },
 }

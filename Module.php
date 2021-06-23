@@ -56,7 +56,13 @@ class Module extends \Aurora\System\Module\AbstractModule
 
 	protected function getServersManager()
 	{
-		return \Aurora\Modules\Mail\Module::getInstance()->getServersManager();
+		$oManager = null;
+		$oMailModule = \Aurora\Api::GetModule('Mail');
+		if ($oMailModule) {
+			$oManager = \Aurora\Modules\Mail\Module::getInstance()->getServersManager();
+		}
+
+		return $oManager;
 	}
 
 	/**
@@ -242,7 +248,8 @@ class Module extends \Aurora\System\Module\AbstractModule
 
 		if (isset($aData['Password']))
 		{
-			$oServer = $oDomain ? $this->getServersManager()->getServer($oDomain->MailServerId) : null;
+			$oServerManager = $this->getServersManager();
+			$oServer = $oDomain && isset($oServerManager) ? $oServerManager->getServer($oDomain->MailServerId) : null;
 			if ($oServer)
 			{
 				try
@@ -257,7 +264,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 			}
 			else
 			{
-				\Aurora\Modules\Core\Module::Decorator()->DeleteUser($oUser->Id);
+//				\Aurora\Modules\Core\Module::Decorator()->DeleteUser($oUser->Id);
 			}
 		}
 	}

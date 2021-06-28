@@ -100,17 +100,19 @@ export default {
     },
 
     isDataValid () {
-      const publicId = _.trim(this.publicId)
-      if (publicId === '') {
-        notification.showError(this.$t('ADMINPANELWEBCLIENT.ERROR_USER_NAME_EMPTY'))
-        this.$refs.publicId.$el.focus()
-        return false
-      }
-      const password = _.trim(this.password)
-      if (password === '') {
-        notification.showError(this.$t('MAILDOMAINS.ERROR_PASSWORD_EMPTY'))
-        this.$refs.password.$el.focus()
-        return false
+      if (this.createMode) {
+        const publicId = _.trim(this.publicId)
+        if (publicId === '') {
+          notification.showError(this.$t('ADMINPANELWEBCLIENT.ERROR_USER_NAME_EMPTY'))
+          this.$refs.publicId.$el.focus()
+          return false
+        }
+        const password = _.trim(this.password)
+        if (password === '') {
+          notification.showError(this.$t('MAILDOMAINS.ERROR_PASSWORD_EMPTY'))
+          this.$refs.password.$el.focus()
+          return false
+        }
       }
       return true
     },

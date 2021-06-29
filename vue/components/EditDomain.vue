@@ -47,7 +47,7 @@
                :label="$t('MAILDOMAINS.ACTION_DELETE_MAILDOMAIN')" v-if="!createMode">
         </q-btn>
         <q-btn unelevated no-caps dense class="q-px-sm q-ml-sm" :ripple="false" color="primary" @click="create"
-               :label="creating ? $t('COREWEBCLIENT.ACTION_CREATE_IN_PROGRESS') : $t('COREWEBCLIENT.ACTION_CREATE')" v-if="createMode">
+               :label="creating ? $t('COREWEBCLIENT.ACTION_CREATE_IN_PROGRESS') : $t('MAILDOMAINS.ACTION_ADD')" v-if="createMode">
         </q-btn>
         <q-btn unelevated no-caps dense class="q-px-sm q-ml-sm" :ripple="false" color="secondary" @click="cancel"
                :label="$t('COREWEBCLIENT.ACTION_CANCEL')" v-if="createMode" >

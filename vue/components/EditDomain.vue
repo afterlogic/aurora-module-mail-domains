@@ -70,7 +70,6 @@ import typesUtils from 'src/utils/types'
 import webApi from 'src/utils/web-api'
 
 import cache from 'src/../../../MailDomains/vue/cache'
-import core from 'src/core'
 
 import DomainModel from 'src/../../../MailDomains/vue/classes/domain'
 
@@ -89,8 +88,6 @@ export default {
 
   data() {
     return {
-      currentTenantId: 0,
-
       selectedServerId: null,
 
       domain: null,
@@ -104,16 +101,19 @@ export default {
   },
 
   computed: {
-    serverOptions: function () {
+    currentTenantId () {
+      return this.$store.getters['tenants/getCurrentTenantId']
+    },
+
+    serverOptions () {
       const serversByTenants = this.$store.getters['mail/getServersByTenants']
       const tenantServers = typesUtils.pArray(serversByTenants[this.currentTenantId])
-      const options = tenantServers.map(server => {
+      return tenantServers.map(server => {
         return {
           value: server.id,
           label: server.name,
         }
       })
-      return options
     },
 
     domainMailServer () {
@@ -136,12 +136,7 @@ export default {
     },
 
     serverOptions () {
-      const isOptionsEmpty = this.serverOptions.length === 0
-      if (isOptionsEmpty) {
-        this.selectedServerId = null
-      } else if (this.selectedServerId === null) {
-        this.selectedServerId = this.serverOptions[0].value
-      }
+      this.setSelectedServerId()
     },
   },
 
@@ -162,7 +157,6 @@ export default {
   },
 
   mounted () {
-    this.currentTenantId = core.getCurrentTenantId()
     this.$store.dispatch('mail/requestTenantServers', this.currentTenantId)
     this.loading = false
     this.creating = false
@@ -187,8 +181,17 @@ export default {
 
     clear () {
       this.domainName = ''
-      this.domainMailServerId = ''
       this.domainUserCount = 0
+      this.setSelectedServerId()
+    },
+
+    setSelectedServerId () {
+      const isOptionsEmpty = this.serverOptions.length === 0
+      if (isOptionsEmpty) {
+        this.selectedServerId = null
+      } else if (!this.serverOptions.find(option => option.value === this.selectedServerId)) {
+        this.selectedServerId = this.serverOptions[0].value
+      }
     },
 
     fillUp (domain) {

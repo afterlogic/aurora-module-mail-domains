@@ -19,6 +19,8 @@
             </q-toolbar>
             <StandardList class="col-grow" :items="domainItems" :selectedItem="selectedDomainId" :loading="loadingDomains"
                           :search="search" :page="page" :pagesCount="pagesCount"
+                          :noItemsText="'MAILDOMAINS.INFO_NO_ENTITIES_FOUND_MAILDOMAIN'"
+                          :noItemsFoundText="'MAILDOMAINS.INFO_NO_ENTITIES_FOUND_MAILDOMAIN'"
                           ref="domainList" @route="route" @check="afterCheck" />
           </div>
         </template>
@@ -40,7 +42,6 @@ import notification from 'src/utils/notification'
 import typesUtils from 'src/utils/types'
 import webApi from 'src/utils/web-api'
 
-import core from 'src/core'
 import cache from 'src/../../../MailDomains/vue/cache'
 
 import ConfirmDialog from 'src/components/ConfirmDialog'
@@ -80,6 +81,10 @@ export default {
   },
 
   computed: {
+    currentTenantId () {
+      return this.$store.getters['tenants/getCurrentTenantId']
+    },
+
     pagesCount () {
       return Math.ceil(this.totalCount / this.limit)
     },
@@ -91,6 +96,10 @@ export default {
   },
 
   watch: {
+    currentTenantId () {
+      this.populate()
+    },
+
     $route (to, from) {
       if (this.$route.path === '/domains/create') {
         this.selectedDomainId = 0
@@ -137,8 +146,7 @@ export default {
   methods: {
     populate () {
       this.loadingDomains = true
-      const currentTenantId = core.getCurrentTenantId()
-      cache.getPagedDomains(currentTenantId, this.search, this.page, this.limit).then(({ domains, totalCount, tenantId, page, search }) => {
+      cache.getPagedDomains(this.currentTenantId, this.search, this.page, this.limit).then(({ domains, totalCount, tenantId, page, search }) => {
         if (page === this.page && search === this.search) {
           this.domains = domains
           this.totalCount = totalCount

@@ -11,7 +11,7 @@
             <div class="col-1" v-t="'MAILDOMAINS.LABEL_MAILDOMAIN'"></div>
             <div class="col-5">{{ domainName }}</div>
           </div>
-          <div class="row q-mb-md">
+          <div class="row q-mb-md" v-if="domainMailServer">
             <div class="col-1" v-t="'MAILDOMAINS.LABEL_MAIL_SERVER'"></div>
             <div class="col-5">{{ domainMailServer }}</div>
           </div>
@@ -36,8 +36,8 @@
           <div class="row q-mb-md">
             <div class="col-1" v-t="'MAILDOMAINS.LABEL_MAIL_SERVER'"></div>
             <div class="col-5">
-              <q-select outlined dense class="bg-white" v-model="selectedMailServer"
-                        emit-value map-options :options="serverOptions" option-label="name" />
+              <q-select outlined dense class="bg-white" v-model="selectedServerId"
+                        emit-value map-options :options="serverOptions" />
             </div>
           </div>
         </q-card-section>
@@ -91,12 +91,11 @@ export default {
     return {
       currentTenantId: 0,
 
-      selectedMailServer: null,
-      serverOptions: [],
+      selectedServerId: null,
 
       domain: null,
       domainName: '',
-      domainMailServer: '',
+      domainMailServerId: '',
       domainUserCount: 0,
 
       loading: false,
@@ -105,6 +104,23 @@ export default {
   },
 
   computed: {
+    serverOptions: function () {
+      const serversByTenants = this.$store.getters['mail/getServersByTenants']
+      const tenantServers = typesUtils.pArray(serversByTenants[this.currentTenantId])
+      const options = tenantServers.map(server => {
+        return {
+          value: server.id,
+          label: server.name,
+        }
+      })
+      return options
+    },
+
+    domainMailServer () {
+      const option = this.serverOptions.find(option => option.value === this.domainMailServerId)
+      return option?.label || ''
+    },
+
     createMode () {
       return this.domain?.id === 0
     },
@@ -117,6 +133,15 @@ export default {
   watch: {
     $route(to, from) {
       this.parseRoute()
+    },
+
+    serverOptions () {
+      const isOptionsEmpty = this.serverOptions.length === 0
+      if (isOptionsEmpty) {
+        this.selectedServerId = null
+      } else if (this.selectedServerId === null) {
+        this.selectedServerId = this.serverOptions[0].value
+      }
     },
   },
 
@@ -138,6 +163,7 @@ export default {
 
   mounted () {
     this.currentTenantId = core.getCurrentTenantId()
+    this.$store.dispatch('mail/requestTenantServers', this.currentTenantId)
     this.loading = false
     this.creating = false
     this.parseRoute()
@@ -161,14 +187,14 @@ export default {
 
     clear () {
       this.domainName = ''
-      this.domainMailServer = ''
+      this.domainMailServerId = ''
       this.domainUserCount = 0
     },
 
     fillUp (domain) {
       this.domain = domain
       this.domainName = domain.name
-      this.domainMailServer = domain.mailServerId
+      this.domainMailServerId = domain.mailServerId
       this.domainUserCount = domain.count
     },
 
@@ -206,7 +232,7 @@ export default {
         this.creating = true
         const parameters = {
           DomainName: this.domainName,
-          MailServerId: this.selectedMailServer,
+          MailServerId: this.selectedServerId,
           TenantId: this.currentTenantId,
         }
 

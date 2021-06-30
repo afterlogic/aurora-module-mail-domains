@@ -1,7 +1,7 @@
 <template>
   <q-page-container style="height: 100vh">
     <q-page class="flex flex-stretch full-height">
-      <q-splitter class="full-height full-width" v-model="listSplitterWidth" :limits="[10,30]">
+      <q-splitter class="full-height full-width" after-class="q-splitter__right-panel" v-model="listSplitterWidth" :limits="[10,30]">
         <template v-slot:before>
           <div class="flex column full-height">
             <q-toolbar class="col-auto">

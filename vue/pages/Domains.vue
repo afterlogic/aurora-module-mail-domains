@@ -19,7 +19,7 @@
             </q-toolbar>
             <StandardList class="col-grow" :items="domainItems" :selectedItem="selectedDomainId" :loading="loadingDomains"
                           :search="search" :page="page" :pagesCount="pagesCount"
-                          :noItemsText="'MAILDOMAINS.INFO_NO_ENTITIES_FOUND_MAILDOMAIN'"
+                          :noItemsText="'MAILDOMAINS.INFO_NO_ENTITIES_MAILDOMAIN'"
                           :noItemsFoundText="'MAILDOMAINS.INFO_NO_ENTITIES_FOUND_MAILDOMAIN'"
                           ref="domainList" @route="route" @check="afterCheck" />
           </div>

@@ -7,6 +7,7 @@
 
 namespace Aurora\Modules\MailDomains\Managers\Domains;
 
+use Aurora\Modules\MailDomains\Models\Domain;
 use Aurora\System\Enums\SortOrder;
 
 /**
@@ -20,18 +21,11 @@ use Aurora\System\Enums\SortOrder;
 class Manager extends \Aurora\System\Managers\AbstractManager
 {
 	/**
-	 * @var \Aurora\System\Managers\Eav
-	 */
-	public $oEavManager = null;
-	
-	/**
 	 * @param \Aurora\System\Module\AbstractModule $oModule
 	 */
 	public function __construct(\Aurora\System\Module\AbstractModule $oModule = null)
 	{
 		parent::__construct($oModule);
-		
-		$this->oEavManager = \Aurora\System\Managers\Eav::getInstance();
 	}
 
 	/**
@@ -46,16 +40,16 @@ class Manager extends \Aurora\System\Managers\AbstractManager
 		{
 			throw new \Aurora\Modules\MailDomains\Exceptions\Exception(\Aurora\Modules\MailDomains\Enums\ErrorCodes::DomainExists);
 		}
-		
-		$oDomain = new \Aurora\Modules\MailDomains\Classes\Domain(\Aurora\Modules\MailDomains\Module::GetName());
+
+		$oDomain = new Domain();
 		$oDomain->TenantId = $iTenantId;
 		$oDomain->MailServerId = $iMailServerId;
 		$oDomain->Name = $sDomainName;
-		$this->oEavManager->saveEntity($oDomain);
-		
-		return $oDomain->EntityId;
+		$oDomain->save();
+
+		return $oDomain->Id;
 	}
-	
+
 	/**
 	 * @param int $iTenantId Tenant identifier.
 	 * @param string $sSearch Search string.
@@ -63,17 +57,15 @@ class Manager extends \Aurora\System\Managers\AbstractManager
 	 */
 	public function getDomainsCount($iTenantId, $sSearch)
 	{
-		$aFilters = [
-			'TenantId' => [$iTenantId, '='],
-			'Name' => ['%' . $sSearch . '%', 'LIKE'],
-		];
-		
-		return $this->oEavManager->getEntitiesCount(
-			\Aurora\Modules\CoreUserGroups\Classes\Group::class,
-			$aFilters
-		);
+		$query = Domain::where('TenantId', $iTenantId);
+		if (!empty($sSearch))
+		{
+			$query->where('Name', 'like', '%' . $sSearch . '%');
+		}
+
+		return $query->count();
 	}
-	
+
 	/**
 	 * Obtains all domains for specified tenant.
 	 * @param int $iTenantId Tenant identifier.
@@ -84,18 +76,20 @@ class Manager extends \Aurora\System\Managers\AbstractManager
 	 */
 	public function getDomainsByTenantId($iTenantId, $iOffset = 0, $iLimit = 0, $sSearch = '')
 	{
-		return (new \Aurora\System\EAV\Query(\Aurora\Modules\MailDomains\Classes\Domain::class))
-			->where([
-				'$AND' => [
-					'TenantId' => [$iTenantId, '='],
-					'Name' => ['%' . $sSearch . '%', 'LIKE']
-				]
-			])
-			->orderBy('Name')
-			->sortOrder(\Aurora\System\Enums\SortOrder::ASC)
-			->limit($iLimit)
-			->offset($iOffset)
-			->exec();			
+		$query = Domain::where('TenantId', $iTenantId);
+		if (!empty($sSearch))
+		{
+			$query->where('Name', 'like', '%' . $sSearch . '%');
+		}
+		if ($iOffset > 0)
+		{
+			$query->offset($iOffset);
+		}
+		if ($iLimit > 0)
+		{
+			$query->limit($iLimit);
+		}
+		return $query->orderBy('Name', 'asc')->get();
 	}
 
 	/**
@@ -105,17 +99,15 @@ class Manager extends \Aurora\System\Managers\AbstractManager
 	 */
 	public function getDomainsByMailServerId($iMailServerId, $iTenantId = null)
 	{
-		$aWhere = ['MailServerId' => [$iMailServerId, '=']];
+		$query = Domain::where('MailServerId', $iMailServerId);
 		if (is_numeric($iTenantId))
 		{
-			$aWhere['TenantId'] = [$iTenantId, '='];
+			$query->where('TenantId', $iTenantId);
 		}
 
-		return (new \Aurora\System\EAV\Query(\Aurora\Modules\MailDomains\Classes\Domain::class))
-			->where($aWhere)
-			->exec();	
+		return $query->get();
 	}
-	
+
 	/**
 	 * Obtains all domains.
 	 * @param int $iOffset Offset of the list.
@@ -124,12 +116,16 @@ class Manager extends \Aurora\System\Managers\AbstractManager
 	 */
 	public function getFullDomainsList($iOffset = 0, $iLimit = 0)
 	{
-		return (new \Aurora\System\EAV\Query(\Aurora\Modules\MailDomains\Classes\Domain::class))
-			->orderBy('Name')
-			->sortOrder(\Aurora\System\Enums\SortOrder::ASC)
-			->limit($iLimit)
-			->offset($iOffset)
-			->exec();	
+		$query = Domain::query();
+		if ($iOffset > 0)
+		{
+			$query->offset($iOffset);
+		}
+		if ($iLimit > 0)
+		{
+			$query->limit($iLimit);
+		}
+		return $query->orderBy('Name', 'asc')->get();
 	}
 
 	/**
@@ -140,23 +136,18 @@ class Manager extends \Aurora\System\Managers\AbstractManager
 	 */
 	public function getDomainsNames($iMailServerId, $iTenantId = null)
 	{
-		$aWhere = ['MailServerId' => [$iMailServerId, '=']];
+		$query = Domain::where('MailServerId', $iMailServerId);
 		if (is_numeric($iTenantId))
 		{
-			$aWhere['TenantId'] = [$iTenantId, '='];
+			$query->where('TenantId', $iTenantId);
 		}
-		$aDomains = (new \Aurora\System\EAV\Query(\Aurora\Modules\MailDomains\Classes\Domain::class))
-			->select(['Name'])
-			->where($aWhere)
-			->orderBy('Name')
-			->sortOrder(\Aurora\System\Enums\SortOrder::ASC)
-			->exec();	
+		$oDomains = $query->orderBy('Name', 'asc')->get();
 
-		return array_map(function ($oDomain) {
+		return $oDomains->map(function ($oDomain) {
 			return $oDomain->Name;
-		}, $aDomains);
+		})->toArray();
 	}
-	
+
 	/**
 	 * Obtains specified domain.
 	 * @param int $iDomainId Domain identifier.
@@ -164,9 +155,9 @@ class Manager extends \Aurora\System\Managers\AbstractManager
 	 */
 	public function getDomain($iDomainId)
 	{
-		return $this->oEavManager->getEntity($iDomainId, \Aurora\Modules\MailDomains\Classes\Domain::class);
+		return Domain::find($iDomainId);
 	}
-	
+
 	/**
 	 * Deletes domain.
 	 * @param int $iDomainId domain identifier.
@@ -174,13 +165,7 @@ class Manager extends \Aurora\System\Managers\AbstractManager
 	 */
 	public function deleteDomain($iDomainId)
 	{
-		$bResult = false;
-		$oDomain = $this->getDomain($iDomainId);
-		if ($oDomain)
-		{
-			$bResult = $this->oEavManager->deleteEntity($iDomainId, \Aurora\Modules\MailDomains\Classes\Domain::class);
-		}
-		return $bResult;
+		return Domain::find($iDomainId)->delete();
 	}
 
 	/**
@@ -191,24 +176,11 @@ class Manager extends \Aurora\System\Managers\AbstractManager
 	 */
 	public function getDomainByName($sDomainName, $iTenantId)
 	{
-		$aFilters = [];
-		if ($iTenantId === 0)
+		$query = Domain::where('Name', $sDomainName);
+		if ($iTenantId !== 0)
 		{
-			$aFilters = ['Name' => [$sDomainName, '=']];
+			$query = $query->where('TenantId', $iTenantId);
 		}
-		else
-		{
-			$aFilters = ['$AND' => [
-				'TenantId' => [$iTenantId, '='],
-				'Name' => [$sDomainName, '=']
-			]];
-		}
-
-		return (new \Aurora\System\EAV\Query(\Aurora\Modules\MailDomains\Classes\Domain::class))
-			->where($aFilters)
-			->orderBy('Name')
-			->sortOrder(\Aurora\System\Enums\SortOrder::ASC)
-			->one()
-			->exec();			
+		return $query->orderBy('Name', 'asc')->first();
 	}
 }

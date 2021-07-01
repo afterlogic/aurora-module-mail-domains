@@ -7,6 +7,9 @@
 
 namespace Aurora\Modules\MailDomains;
 
+use Aurora\Modules\Core\Models\User;
+use Illuminate\Database\Eloquent\Builder;
+
 /**
  * @license https://www.gnu.org/licenses/agpl-3.0.html AGPL-3.0
  * @license https://afterlogic.com/products/common-licensing Afterlogic Software License
@@ -39,13 +42,6 @@ class Module extends \Aurora\System\Module\AbstractModule
 		$this->subscribeEvent('Mail::GetMailServerByDomain::before', array($this, 'onBeforeGetMailServerByDomain'));
 		$this->subscribeEvent('GetMailDomains', [$this, 'onGetMailDomains']);
 		$this->subscribeEvent('Mail::GetServerDomains::after', [$this, 'onAfterGetMailDomains']);
-
-		\Aurora\Modules\Core\Classes\User::extend(
-			self::GetName(),
-			[
-				'DomainId' => array('int', 0, true)
-			]
-		);
 	}
 
 	public function getDomainsManager()
@@ -60,7 +56,13 @@ class Module extends \Aurora\System\Module\AbstractModule
 
 	protected function getServersManager()
 	{
-		return \Aurora\Modules\Mail\Module::getInstance()->getServersManager();
+		$oManager = null;
+		$oMailModule = \Aurora\Api::GetModule('Mail');
+		if ($oMailModule) {
+			$oManager = \Aurora\Modules\Mail\Module::getInstance()->getServersManager();
+		}
+
+		return $oManager;
 	}
 
 	/**
@@ -92,7 +94,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 		if (isset($aArgs['Domain']))
 		{
 			$oTenant = \Aurora\System\Api::getTenantByWebDomain();
-			$oDomain = $this->getDomainsManager()->getDomainByName($aArgs['Domain'], $oTenant ? $oTenant->EntityId : 0);
+			$oDomain = $this->getDomainsManager()->getDomainByName($aArgs['Domain'], $oTenant ? $oTenant->Id : 0);
 			if ($oDomain)
 			{
 				$oServer = $this->getServersManager()->getServer($oDomain->MailServerId);
@@ -113,7 +115,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	{
 		$iTenantId = null;
 		$oAuthenticatedUser = \Aurora\System\Api::getAuthenticatedUser();
-		if ($oAuthenticatedUser instanceof \Aurora\Modules\Core\Classes\User)
+		if ($oAuthenticatedUser instanceof \Aurora\Modules\Core\Models\User)
 		{
 			if ($oAuthenticatedUser->Role === \Aurora\System\Enums\UserRole::NormalUser || $oAuthenticatedUser->Role === \Aurora\System\Enums\UserRole::TenantAdmin)
 			{
@@ -146,7 +148,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	public function GetDomains($TenantId = 0, $Offset = 0, $Limit = 0, $Search = '')
 	{
 		$oAuthenticatedUser = \Aurora\System\Api::getAuthenticatedUser();
-		if ($oAuthenticatedUser instanceof \Aurora\Modules\Core\Classes\User && $oAuthenticatedUser->Role === \Aurora\System\Enums\UserRole::TenantAdmin && $oAuthenticatedUser->IdTenant === $TenantId)
+		if ($oAuthenticatedUser instanceof \Aurora\Modules\Core\Models\User && $oAuthenticatedUser->Role === \Aurora\System\Enums\UserRole::TenantAdmin && $oAuthenticatedUser->IdTenant === $TenantId)
 		{
 			\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::TenantAdmin);
 		}
@@ -161,15 +163,16 @@ class Module extends \Aurora\System\Module\AbstractModule
 		}
 
 		$aResult = [];
-		$aDomains = $this->getDomainsManager()->getDomainsByTenantId($TenantId, $Offset, $Limit, $Search);
+		$oDomains = $this->getDomainsManager()->getDomainsByTenantId($TenantId, $Offset, $Limit, $Search);
 		$iDomainsCount = $this->getDomainsManager()->getDomainsCount($TenantId, $Search);
-		foreach ($aDomains as $oDomain)
+		foreach ($oDomains as $oDomain)
 		{
-			$oDomain->Count = \Aurora\Modules\Core\Module::getInstance()->getUsersManager()->getUsersCount('', [self::GetName() . '::DomainId' => $oDomain->EntityId]);
+			$oFilter = User::where('Properties->' . self::GetName() . '::DomainId', $oDomain->Id);
+			$oDomain->Count = \Aurora\Modules\Core\Module::getInstance()->getUsersManager()->getUsersCount('', $oFilter);
 			$oDomain->Name = \trim($oDomain->Name);
 			$aResult[] = $oDomain;
 		}
-		if (is_array($aDomains))
+		if (is_array($aResult))
 		{
 			return [
 				'Count' => $iDomainsCount,
@@ -190,7 +193,8 @@ class Module extends \Aurora\System\Module\AbstractModule
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::SuperAdmin);
 
 		$oDomain = $this->getDomainsManager()->getDomain($Id);
-		$oDomain->Count = \Aurora\Modules\Core\Module::Decorator()->getUsersManager()->getUsersCount('', [self::GetName() . '::DomainId' => $Id]);
+		$oFilter = User::where('Properties->' . self::GetName() . '::DomainId', $oDomain->Id);
+		$oDomain->Count = \Aurora\Modules\Core\Module::Decorator()->getUsersManager()->getUsersCount('', $oFilter);
 
 		return $oDomain;
 	}
@@ -198,7 +202,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	/**
 	 * Deletes domains.
 	 * @param int $TenantId Identifier of tenant which contains domains from list.
-	 * @param int $IdList List of domain identifiers.
+	 * @param array $IdList List of domain identifiers.
 	 * @return boolean
 	 */
 	public function DeleteDomains($TenantId, $IdList)
@@ -208,10 +212,11 @@ class Module extends \Aurora\System\Module\AbstractModule
 		foreach ($IdList as $iDomainId)
 		{
 			// delete domain users
-			$aUsers = \Aurora\Modules\Core\Module::Decorator()->getUsersManager()->getUserList(0, 0, 'PublicId', \Aurora\System\Enums\SortOrder::ASC, '', [self::GetName() . '::DomainId' => $iDomainId]);
-			foreach ($aUsers as $aUser)
+			$oFilter = User::where('Properties->' . self::GetName() . '::DomainId', $iDomainId);
+			$aUsers = \Aurora\Modules\Core\Module::Decorator()->getUsersManager()->getUserList(0, 0, 'PublicId', \Aurora\System\Enums\SortOrder::ASC, '', $oFilter);
+			foreach ($aUsers as $oUser)
 			{
-				\Aurora\Modules\Core\Module::Decorator()->DeleteUser($aUser['EntityId']);
+				\Aurora\Modules\Core\Module::Decorator()->DeleteUser($oUser->Id);
 			}
 
 			// delete domain
@@ -236,29 +241,30 @@ class Module extends \Aurora\System\Module\AbstractModule
 		$oUser = \Aurora\System\Api::getUserById($mResult);
 		if ($oDomain && $oUser)
 		{
-			$oUser->{self::GetName() . '::DomainId'} = $oDomain->EntityId;
+			$oUser->setExtendedProp(self::GetName() . '::DomainId', $oDomain->Id);
 			$oUser->IdTenant = $oDomain->TenantId;
 			\Aurora\Modules\Core\Module::Decorator()->UpdateUserObject($oUser);
 		}
 
 		if (isset($aData['Password']))
 		{
-			$oServer = $oDomain ? $this->getServersManager()->getServer($oDomain->MailServerId) : null;
+			$oServerManager = $this->getServersManager();
+			$oServer = $oDomain && isset($oServerManager) ? $oServerManager->getServer($oDomain->MailServerId) : null;
 			if ($oServer)
 			{
 				try
 				{
-					\Aurora\Modules\Mail\Module::Decorator()->CreateAccount($oUser->EntityId, '', $aData['PublicId'], $aData['PublicId'], $aData['Password'], $oServer->toResponseArray());
+					\Aurora\Modules\Mail\Module::Decorator()->CreateAccount($oUser->Id, '', $aData['PublicId'], $aData['PublicId'], $aData['Password'], $oServer->toResponseArray());
 				}
 				catch(\Exception $oException)
 				{
-					\Aurora\Modules\Core\Module::Decorator()->DeleteUser($oUser->EntityId);
+					\Aurora\Modules\Core\Module::Decorator()->DeleteUser($oUser->Id);
 					throw $oException;
 				}
 			}
 			else
 			{
-				\Aurora\Modules\Core\Module::Decorator()->DeleteUser($oUser->EntityId);
+//				\Aurora\Modules\Core\Module::Decorator()->DeleteUser($oUser->Id);
 			}
 		}
 	}
@@ -331,27 +337,21 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 */
 	public function onBeforeGetEntityList(&$aArgs, &$mResult)
 	{
-		if ($aArgs['Type'] === 'User')
-		{
+		if ($aArgs['Type'] === 'User') {
 			$this->onBeforeGetUsers($aArgs, $mResult);
 		}
 	}
 
 	public function onBeforeGetUsers(&$aArgs, &$mResult)
 	{
-		if (isset($aArgs['DomainId']) && $aArgs['DomainId'] !== -1)
-		{
-			if (isset($aArgs['Filters']) && is_array($aArgs['Filters']) && count($aArgs['Filters']) > 0)
-			{
-				$aArgs['Filters'][self::GetName() . '::DomainId'] = [$aArgs['DomainId'], '='];
-				$aArgs['Filters'] = [
-					'$AND' => $aArgs['Filters']
-				];
+		if (isset($aArgs['DomainId']) && $aArgs['DomainId'] !== -1) {
+			if (isset($aArgs['Filters']) && $aArgs['Filters'] instanceof Builder) {
+				$oFilters = $aArgs['Filters'];
 			}
-			else
-			{
-				$aArgs['Filters'] = [self::GetName() . '::DomainId' => [$aArgs['DomainId'], '=']];
+			else {
+				$oFilters = User::query();
 			}
+			$aArgs['Filters'] = $oFilters->where('Properties->' . self::GetName() . '::DomainId', $aArgs['DomainId']);
 		}
 	}
 

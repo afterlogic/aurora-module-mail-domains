@@ -1,37 +1,34 @@
 <template>
-  <q-page-container style="height: 100vh">
-    <q-page class="flex flex-stretch full-height">
-      <q-splitter class="full-height full-width" after-class="q-splitter__right-panel" v-model="listSplitterWidth" :limits="[10,30]">
-        <template v-slot:before>
-          <div class="flex column full-height">
-            <q-toolbar class="col-auto">
-              <q-btn flat color="grey-8" size="lg" icon="delete" :label="countLabel" :disable="checkedIds.length === 0"
-                     @click="askDeleteCheckedDomains">
-                <q-tooltip>
-                  {{ $t('COREWEBCLIENT.ACTION_DELETE') }}
-                </q-tooltip>
-              </q-btn>
-              <q-btn flat color="grey-8" size="lg" icon="add" @click="routeCreateDomain">
-                <q-tooltip>
-                  {{ $t('MAILDOMAINS.ACTION_ADD_ENTITY_MAILDOMAIN') }}
-                </q-tooltip>
-              </q-btn>
-            </q-toolbar>
-            <StandardList class="col-grow" :items="domainItems" :selectedItem="selectedDomainId" :loading="loadingDomains"
-                          :search="search" :page="page" :pagesCount="pagesCount"
-                          :noItemsText="'MAILDOMAINS.INFO_NO_ENTITIES_MAILDOMAIN'"
-                          :noItemsFoundText="'MAILDOMAINS.INFO_NO_ENTITIES_FOUND_MAILDOMAIN'"
-                          ref="domainList" @route="route" @check="afterCheck" />
-          </div>
-        </template>
-        <template v-slot:after>
-          <router-view @no-domain-found="handleNoDomainFound" @domain-created="handleCreateDomain"
-                       @cancel-create="route" @delete-domain="askDeleteDomain" :deletingIds="deletingIds"></router-view>
-        </template>
-      </q-splitter>
-    </q-page>
-    <ConfirmDialog ref="confirmDialog" />
-  </q-page-container>
+  <q-splitter class="full-height full-width" after-class="q-splitter__right-panel" v-model="listSplitterWidth"
+              :limits="[10,30]">
+    <template v-slot:before>
+      <div class="flex column full-height">
+        <q-toolbar class="col-auto">
+          <q-btn flat color="grey-8" size="lg" icon="delete" :label="countLabel" :disable="checkedIds.length === 0"
+                 @click="askDeleteCheckedDomains">
+            <q-tooltip>
+              {{ $t('COREWEBCLIENT.ACTION_DELETE') }}
+            </q-tooltip>
+          </q-btn>
+          <q-btn flat color="grey-8" size="lg" icon="add" @click="routeCreateDomain">
+            <q-tooltip>
+              {{ $t('MAILDOMAINS.ACTION_ADD_ENTITY_MAILDOMAIN') }}
+            </q-tooltip>
+          </q-btn>
+        </q-toolbar>
+        <StandardList class="col-grow" :items="domainItems" :selectedItem="selectedDomainId" :loading="loadingDomains"
+                      :search="search" :page="page" :pagesCount="pagesCount"
+                      :noItemsText="'MAILDOMAINS.INFO_NO_ENTITIES_MAILDOMAIN'"
+                      :noItemsFoundText="'MAILDOMAINS.INFO_NO_ENTITIES_FOUND_MAILDOMAIN'"
+                      ref="domainList" @route="route" @check="afterCheck"/>
+      </div>
+    </template>
+    <template v-slot:after>
+      <router-view @no-domain-found="handleNoDomainFound" @domain-created="handleCreateDomain"
+                   @cancel-create="route" @delete-domain="askDeleteDomain" :deletingIds="deletingIds"></router-view>
+    </template>
+    <ConfirmDialog ref="confirmDialog"/>
+  </q-splitter>
 </template>
 
 <script>

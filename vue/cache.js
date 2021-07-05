@@ -5,7 +5,7 @@ import notification from 'src/utils/notification'
 import typesUtils from 'src/utils/types'
 import webApi from 'src/utils/web-api'
 
-import DomainModel from 'src/../../../MailDomains/vue/classes/domain'
+import DomainModel from './classes/domain'
 
 const allDomains = {}
 let currentDomains = []

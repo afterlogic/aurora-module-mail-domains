@@ -69,9 +69,9 @@ import notification from 'src/utils/notification'
 import typesUtils from 'src/utils/types'
 import webApi from 'src/utils/web-api'
 
-import cache from 'src/../../../MailDomains/vue/cache'
+import cache from '../cache'
 
-import DomainModel from 'src/../../../MailDomains/vue/classes/domain'
+import DomainModel from '../classes/domain'
 
 import UnsavedChangesDialog from 'src/components/UnsavedChangesDialog'
 

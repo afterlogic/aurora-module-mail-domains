@@ -24,13 +24,13 @@ export default {
         beforeUsers: true,
         pageTitle: 'MAILDOMAINS.HEADING_MAILDOMAIN_SETTINGS_TABNAME',
         component () {
-          return import('src/../../../MailDomains/vue/pages/Domains')
+          return import('./pages/Domains')
         },
       }
     ]
   },
 
   getUserMainDataComponent () {
-    return import('src/../../../MailDomains/vue/components/EditUserMainData')
+    return import('./components/EditUserMainData')
   },
 }

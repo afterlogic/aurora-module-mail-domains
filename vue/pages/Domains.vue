@@ -39,13 +39,13 @@ import notification from 'src/utils/notification'
 import typesUtils from 'src/utils/types'
 import webApi from 'src/utils/web-api'
 
-import cache from 'src/../../../MailDomains/vue/cache'
+import cache from '../cache'
 
 import ConfirmDialog from 'src/components/ConfirmDialog'
 import Empty from 'src/components/Empty'
 import StandardList from 'src/components/StandardList'
 
-import EditDomain from 'src/../../../MailDomains/vue/components/EditDomain'
+import EditDomain from '../components/EditDomain'
 
 export default {
   name: 'Domains',

@@ -33,7 +33,7 @@ import _ from 'lodash'
 
 import notification from 'src/utils/notification'
 
-import cache from 'src/../../../MailDomains/vue/cache'
+import cache from '../cache'
 
 export default {
   name: 'EditUserPublicId',

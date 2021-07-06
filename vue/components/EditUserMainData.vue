@@ -22,7 +22,7 @@
       <div class="col-1 q-my-sm" v-t="'COREWEBCLIENT.LABEL_PASSWORD'"></div>
       <div class="col-3">
         <q-input outlined dense class="bg-white" v-model="password" ref="password" type="password"
-                 @keyup.enter="save" />
+                 autocomplete="new-password" @keyup.enter="save"/>
       </div>
     </div>
   </div>

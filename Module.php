@@ -305,7 +305,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 		{
 			foreach ($mDomains as $oDomain)
 			{
-				self::Decorator()->DeleteDomains($oDomain->TenantId, [$oDomain->EntityId]);
+				self::Decorator()->DeleteDomains($oDomain->TenantId, [$oDomain->Id]);
 			}
 		}
 	}
@@ -322,7 +322,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 			{
 				if ($oDomain->TenantId === $TenantId)
 				{
-					$aDomainIds[] = $oDomain->EntityId;
+					$aDomainIds[] = $oDomain->Id;
 				}
 			}
 		}

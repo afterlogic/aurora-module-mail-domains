@@ -31,7 +31,7 @@ class Domain extends \Aurora\System\EAV\Entity
 	public function toResponseArray()
 	{
 		return [
-			'Id' => $this->EntityId,
+			'Id' => $this->Id,
 			'TenantId' => $this->TenantId,
 			'MailServerId' => $this->MailServerId,
 			'Name' => $this->Name,

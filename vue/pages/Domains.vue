@@ -4,13 +4,15 @@
     <template v-slot:before>
       <div class="flex column full-height">
         <q-toolbar class="col-auto">
-          <q-btn flat color="grey-8" size="lg" icon="delete" :label="countLabel" :disable="checkedIds.length === 0"
+          <q-btn flat color="grey-8" size="lg" :label="countLabel" :disable="checkedIds.length === 0"
                  @click="askDeleteCheckedDomains">
+            <Trash></Trash>
             <q-tooltip>
               {{ $t('COREWEBCLIENT.ACTION_DELETE') }}
             </q-tooltip>
           </q-btn>
-          <q-btn flat color="grey-8" size="lg" icon="add" @click="routeCreateDomain">
+          <q-btn flat color="grey-8" size="lg" @click="routeCreateDomain">
+            <Add></Add>
             <q-tooltip>
               {{ $t('MAILDOMAINS.ACTION_ADD_ENTITY_MAILDOMAIN') }}
             </q-tooltip>
@@ -47,12 +49,17 @@ import StandardList from 'src/components/StandardList'
 
 import EditDomain from '../components/EditDomain'
 
+import Add from 'src/assets/icons/Add'
+import Trash from 'src/assets/icons/Trash'
+
 export default {
   name: 'Domains',
 
   components: {
     ConfirmDialog,
     StandardList,
+    Add,
+    Trash
   },
 
   data() {

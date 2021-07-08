@@ -3,15 +3,15 @@
               :limits="[10,30]">
     <template v-slot:before>
       <div class="flex column full-height">
-        <q-toolbar class="col-auto">
-          <q-btn flat color="grey-8" size="lg" :label="countLabel" :disable="checkedIds.length === 0"
+        <q-toolbar class="col-auto q-my-sm">
+          <q-btn flat color="grey-8" size="mg" :label="countLabel" :disable="checkedIds.length === 0"
                  @click="askDeleteCheckedDomains">
             <Trash></Trash>
             <q-tooltip>
               {{ $t('COREWEBCLIENT.ACTION_DELETE') }}
             </q-tooltip>
           </q-btn>
-          <q-btn flat color="grey-8" size="lg" @click="routeCreateDomain">
+          <q-btn flat color="grey-8" size="mg" @click="routeCreateDomain">
             <Add></Add>
             <q-tooltip>
               {{ $t('MAILDOMAINS.ACTION_ADD_ENTITY_MAILDOMAIN') }}

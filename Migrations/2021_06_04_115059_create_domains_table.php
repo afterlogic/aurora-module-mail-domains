@@ -20,7 +20,9 @@ class CreateDomainsTable extends Migration
             $table->string('Name')->default('');
             $table->integer('Count')->default(0);
             $table->json('Properties')->nullable();
-            $table->timestamps();
+            $table->timestamp(\Aurora\System\Classes\Model::CREATED_AT)->nullable();
+            $table->timestamp(\Aurora\System\Classes\Model::UPDATED_AT)->nullable();
+
         });
     }
 

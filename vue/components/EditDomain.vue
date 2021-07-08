@@ -30,13 +30,13 @@
           <div class="row q-mb-md">
             <div class="col-1" v-t="'MAILDOMAINS.LABEL_MAILDOMAIN'"></div>
             <div class="col-5">
-              <q-input outlined dense class="bg-white" v-model="domainName" ref="domainName" @keyup.enter="create" />
+              <q-input outlined dense bg-color="white" v-model="domainName" ref="domainName" @keyup.enter="create" />
             </div>
           </div>
           <div class="row q-mb-md">
             <div class="col-1" v-t="'MAILDOMAINS.LABEL_MAIL_SERVER'"></div>
             <div class="col-5">
-              <q-select outlined dense class="bg-white" v-model="selectedServerId"
+              <q-select outlined dense bg-color="white" v-model="selectedServerId"
                         emit-value map-options :options="serverOptions" />
             </div>
           </div>

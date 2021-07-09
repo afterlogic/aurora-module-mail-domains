@@ -2,17 +2,20 @@ import eventBus from 'src/event-bus'
 
 import _ from 'lodash'
 
+const _disableEditDomainsInServer = params => {
+  if (_.isObject(params)) {
+    params.disableEditDomainsInServer = true
+  }
+}
+
 export default {
   moduleName: 'MailDomains',
 
   requiredModules: ['MailWebclient'],
 
   initSubscriptions (appData) {
-    eventBus.$on('MailWebclient::DisableEditDomainsInServer', params => {
-      if (_.isObject(params)) {
-        params.disableEditDomainsInServer = true
-      }
-    })
+    eventBus.$off('MailWebclient::DisableEditDomainsInServer', _disableEditDomainsInServer)
+    eventBus.$on('MailWebclient::DisableEditDomainsInServer', _disableEditDomainsInServer)
   },
 
   init (appData) {},

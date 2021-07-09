@@ -101,6 +101,9 @@ export default {
 
   watch: {
     currentTenantId () {
+      if (this.$route.path !== '/domains') {
+        this.route()
+      }
       this.populate()
     },
 

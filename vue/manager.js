@@ -36,4 +36,10 @@ export default {
   getUserMainDataComponent () {
     return import('./components/EditUserMainData')
   },
+
+  async getFiltersForUsers () {
+    return [
+      await import('./components/DomainFilterForUsers')
+    ]
+  },
 }

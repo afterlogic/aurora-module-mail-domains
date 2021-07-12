@@ -15,16 +15,16 @@
             <div class="col-1" v-t="'MAILDOMAINS.LABEL_MAIL_SERVER'"></div>
             <div class="col-5">{{ domainMailServer }}</div>
           </div>
-          <div class="row">
+          <div class="row q-mb-md">
             <div class="col-1" v-t="'MAILDOMAINS.LABEL_MAILDOMAIN_USERS_COUNT'"></div>
             <div class="col-5">{{ domainUserCount }}</div>
           </div>
-<!--          <div class="row" v-if="domain">-->
-<!--            <div class="col-6">-->
-<!--              <router-link :to="'/users/domain/' + domain.id" :ripple="false" class="q-px-none"-->
-<!--                           v-t="'MAILDOMAINS.ACTION_SHOW_DOMAIN_USERS'"></router-link>-->
-<!--            </div>-->
-<!--          </div>-->
+          <div class="row" v-if="domain">
+            <div class="col-6">
+              <router-link :to="'/users/domain/' + domain.id" :ripple="false" class="q-px-none"
+                           v-t="'MAILDOMAINS.ACTION_SHOW_DOMAIN_USERS'"></router-link>
+            </div>
+          </div>
         </q-card-section>
         <q-card-section v-if="createMode">
           <div class="row q-mb-md">

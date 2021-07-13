@@ -50,7 +50,6 @@ export default {
       password: '',
       domains: [],
       selectedDomain: null,
-      totalCount: 0,
     }
   },
 
@@ -63,14 +62,12 @@ export default {
   mounted () {
     this.password = ''
     this.domains = []
-    this.totalCount = 0
     cache.getDomains(this.currentTenantId).then(({ domains, totalCount, tenantId }) => {
       if (tenantId === this.currentTenantId) {
         this.domains = domains
         if (this.domains.length > 0) {
           this.selectedDomain = this.domains[0]
         }
-        this.totalCount = totalCount
       }
     })
   },

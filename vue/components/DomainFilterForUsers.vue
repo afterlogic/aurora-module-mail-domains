@@ -1,11 +1,12 @@
 <template>
-  <div>
+  <div v-if="filterOptions.length > 0">
     <q-select style="width: 180px" outlined dense class="bg-white"
               v-model="currentFilter" :options="filterOptions"/>
   </div>
 </template>
 
 <script>
+import notification from 'src/utils/notification'
 import typesUtils from 'src/utils/types'
 
 import cache from '../cache'
@@ -26,7 +27,7 @@ export default {
   },
 
   computed: {
-    currentTenantId() {
+    currentTenantId () {
       return this.$store.getters['tenants/getCurrentTenantId']
     },
 
@@ -44,41 +45,55 @@ export default {
     filterOptions () {
       this.fillUpFilterValue()
     },
+
+    currentTenantId () {
+      this.requestDomains()
+    },
+
     currentFilter (option) {
       this.selectFilter(option.value)
     }
   },
 
   mounted () {
-    cache.getDomains(this.currentTenantId).then(({ domains, totalCount, tenantId }) => {
-      if (tenantId === this.currentTenantId) {
-        const options = domains.map(domain => {
-          return {
-            label: domain.name,
-            value: domain.id,
-          }
-        })
-        if (options.length > 0) {
-          options.unshift({
-            label: this.$t('MAILDOMAINS.LABEL_ALL_DOMAINS'),
-            value: -1,
-          })
-          options.push({
-            label: this.$t('MAILDOMAINS.LABEL_NOT_IN_ANY_DOMAIN'),
-            value: 0,
-          })
-        }
-        this.filterOptions = options
-        this.currentFilter = this.selectedFilterText()
-      }
-    })
+    this.requestDomains()
   },
 
   methods: {
+    requestDomains () {
+      cache.getDomains(this.currentTenantId).then(({ domains, totalCount, tenantId }) => {
+        if (tenantId === this.currentTenantId) {
+          const options = domains.map(domain => {
+            return {
+              label: domain.name,
+              value: domain.id,
+            }
+          })
+          if (options.length > 0) {
+            options.unshift({
+              label: this.$t('MAILDOMAINS.LABEL_ALL_DOMAINS'),
+              value: -1,
+            })
+            options.push({
+              label: this.$t('MAILDOMAINS.LABEL_NOT_IN_ANY_DOMAIN'),
+              value: 0,
+            })
+          }
+          this.filterOptions = options
+          this.currentFilter = this.selectedFilterText()
+          this.$emit('allow-create-user', { tenantId, allowCreateUser: options.length > 0 })
+          if (options.length === 0) {
+            notification.showError(this.$t('MAILDOMAINS.ERROR_ADD_DOMAIN_FIRST'))
+          }
+        }
+      })
+    },
+
     selectedFilterText () {
       const option = this.filterOptions.find(filter => filter.value === this.filterValue)
       return option ? option : this.filterOptions[0]
     },
+
     fillUpFilterValue () {
       this.filterValue = typesUtils.pInt(this.$route?.params?.domain, -1)
       this.$emit('filter-filled-up', {

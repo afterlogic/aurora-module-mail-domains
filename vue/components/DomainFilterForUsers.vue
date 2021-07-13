@@ -39,7 +39,7 @@ export default {
   watch: {
     $route (to, from) {
       this.fillUpFilterValue()
-      this.currentFilter = this.selectedFilterText()
+      this.currentFilter = this.findCurrentFilter()
     },
 
     filterOptions () {
@@ -80,7 +80,7 @@ export default {
             })
           }
           this.filterOptions = options
-          this.currentFilter = this.selectedFilterText()
+          this.currentFilter = this.findCurrentFilter()
           this.$emit('allow-create-user', { tenantId, allowCreateUser: options.length > 0 })
           if (options.length === 0) {
             notification.showError(this.$t('MAILDOMAINS.ERROR_ADD_DOMAIN_FIRST'))
@@ -89,9 +89,12 @@ export default {
       })
     },
 
-    selectedFilterText () {
-      const option = this.filterOptions.find(filter => filter.value === this.filterValue)
-      return option ? option : this.filterOptions[0]
+    findCurrentFilter () {
+      if (this.filterOptions.length) {
+        const option = this.filterOptions.find(filter => filter.value === this.filterValue)
+        return option || this.filterOptions[0]
+      }
+      return ''
     },
 
     fillUpFilterValue () {

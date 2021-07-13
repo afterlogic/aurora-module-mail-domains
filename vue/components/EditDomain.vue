@@ -43,7 +43,7 @@
         </q-card-section>
       </q-card>
       <div class="q-pa-md text-right">
-        <q-btn unelevated no-caps dense class="q-px-sm" :ripple="false" color="primary" @click="deleteDomain"
+        <q-btn unelevated no-caps dense class="q-px-sm" :ripple="false" color="negative" @click="deleteDomain"
                :label="$t('MAILDOMAINS.ACTION_DELETE_MAILDOMAIN')" v-if="!createMode">
         </q-btn>
         <q-btn unelevated no-caps dense class="q-px-sm q-ml-sm" :ripple="false" color="primary" @click="create"

@@ -4,7 +4,7 @@
     <template v-slot:before>
       <div class="flex column full-height">
         <q-toolbar class="col-auto q-my-sm">
-          <q-btn flat color="grey-8" size="mg" :disable="checkedIds.length === 0"
+          <q-btn flat color="grey-8" size="mg" no-wrap :disable="checkedIds.length === 0"
                  @click="askDeleteCheckedDomains">
             <Trash></Trash>
             <span>{{ countLabel }}</span>

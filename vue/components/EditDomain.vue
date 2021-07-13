@@ -8,16 +8,16 @@
       <q-card flat bordered class="card-edit-settings">
         <q-card-section v-if="!createMode">
           <div class="row q-mb-md">
-            <div class="col-1" v-t="'MAILDOMAINS.LABEL_MAILDOMAIN'"></div>
-            <div class="col-5">{{ domainName }}</div>
+            <div class="col-2" v-t="'MAILDOMAINS.LABEL_MAILDOMAIN'"></div>
+            <div class="col-5 q-ml-md"><b>{{ domainName }}</b></div>
           </div>
           <div class="row q-mb-md" v-if="domainMailServer">
-            <div class="col-1" v-t="'MAILDOMAINS.LABEL_MAIL_SERVER'"></div>
-            <div class="col-5">{{ domainMailServer }}</div>
+            <div class="col-2" v-t="'MAILDOMAINS.LABEL_MAIL_SERVER'"></div>
+            <div class="col-5 q-ml-md"><b>{{ domainMailServer }}</b></div>
           </div>
           <div class="row q-mb-md">
-            <div class="col-1" v-t="'MAILDOMAINS.LABEL_MAILDOMAIN_USERS_COUNT'"></div>
-            <div class="col-5">{{ domainUserCount }}</div>
+            <div class="col-2" v-t="'MAILDOMAINS.LABEL_MAILDOMAIN_USERS_COUNT'"></div>
+            <div class="col-5 q-ml-md"><b>{{ domainUserCount }}</b></div>
           </div>
           <div class="row" v-if="domain">
             <div class="col-6">
@@ -42,7 +42,7 @@
           </div>
         </q-card-section>
       </q-card>
-      <div class="q-pa-md text-right">
+      <div class="q-pt-md text-right">
         <q-btn unelevated no-caps dense class="q-px-sm" :ripple="false" color="negative" @click="deleteDomain"
                :label="$t('MAILDOMAINS.ACTION_DELETE_MAILDOMAIN')" v-if="!createMode">
         </q-btn>

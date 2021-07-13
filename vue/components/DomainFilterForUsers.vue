@@ -1,12 +1,8 @@
 <template>
-  <q-btn-dropdown no-icon-animation cover auto-close stretch flat dense :ripple="false" :label="selectedFilterText"
-                  class="q-px-none text-weight-regular no-hover" v-if="visible">
-    <q-list class="non-selectable" v-for="option in filterOptions" :key="option.value">
-      <q-item clickable @click="selectFilter(option.value)">
-        <q-item-section>{{option.text}}</q-item-section>
-      </q-item>
-    </q-list>
-  </q-btn-dropdown>
+  <div>
+    <q-select style="width: 180px" outlined dense class="bg-white"
+              v-model="currentFilter" :options="filterOptions"/>
+  </div>
 </template>
 
 <script>
@@ -25,6 +21,7 @@ export default {
     return {
       filterOptions: [],
       filterValue: null,
+      currentFilter: ''
     }
   },
 
@@ -36,21 +33,20 @@ export default {
     visible () {
       return this.filterOptions.length > 0
     },
-
-    selectedFilterText () {
-      const option = this.filterOptions.find(filter => filter.value === this.filterValue)
-      return option ? option.text : ''
-    },
   },
 
   watch: {
     $route (to, from) {
       this.fillUpFilterValue()
+      this.currentFilter = this.selectedFilterText()
     },
 
     filterOptions () {
       this.fillUpFilterValue()
     },
+    currentFilter (option) {
+      this.selectFilter(option.value)
+    }
   },
 
   mounted () {
@@ -58,26 +54,31 @@ export default {
       if (tenantId === this.currentTenantId) {
         const options = domains.map(domain => {
           return {
-            text: domain.name,
+            label: domain.name,
             value: domain.id,
           }
         })
         if (options.length > 0) {
           options.unshift({
-            text: this.$t('MAILDOMAINS.LABEL_ALL_DOMAINS'),
+            label: this.$t('MAILDOMAINS.LABEL_ALL_DOMAINS'),
             value: -1,
           })
           options.push({
-            text: this.$t('MAILDOMAINS.LABEL_NOT_IN_ANY_DOMAIN'),
+            label: this.$t('MAILDOMAINS.LABEL_NOT_IN_ANY_DOMAIN'),
             value: 0,
           })
         }
         this.filterOptions = options
+        this.currentFilter = this.selectedFilterText()
       }
     })
   },
 
   methods: {
+    selectedFilterText () {
+      const option = this.filterOptions.find(filter => filter.value === this.filterValue)
+      return option ? option : this.filterOptions[0]
+    },
     fillUpFilterValue () {
       this.filterValue = typesUtils.pInt(this.$route?.params?.domain, -1)
       this.$emit('filter-filled-up', {

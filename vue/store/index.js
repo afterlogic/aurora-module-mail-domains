@@ -1,6 +1,5 @@
 import Vue from 'vue'
 
-import typesUtils from 'src/utils/types'
 import _ from 'lodash'
 import webApi from 'src/utils/web-api'
 

@@ -60,19 +60,23 @@ export default {
   },
 
   mounted () {
-    this.password = ''
-    this.domains = []
-    cache.getDomains(this.currentTenantId).then(({ domains, totalCount, tenantId }) => {
-      if (tenantId === this.currentTenantId) {
-        this.domains = domains
-        if (this.domains.length > 0) {
-          this.selectedDomain = this.domains[0]
-        }
-      }
-    })
+    this.populate()
   },
 
   methods: {
+    populate () {
+      this.publicId = this.user?.publicId
+      this.password = ''
+      this.domains = []
+      cache.getDomains(this.currentTenantId).then(({ domains, totalCount, tenantId }) => {
+        if (tenantId === this.currentTenantId) {
+          this.domains = domains
+          if (this.domains.length > 0) {
+            this.selectedDomain = this.domains[0]
+          }
+        }
+      })
+    },
     getSaveParameters () {
       const parameters = {
         PublicId: this.createMode ? this.publicId + '@' + this.selectedDomain?.name : this.user?.publicId,

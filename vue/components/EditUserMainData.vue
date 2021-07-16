@@ -88,6 +88,9 @@ export default {
       return parameters
     },
 
+    /**
+     * Method is used in the parent component
+     */
     hasChanges () {
       if (this.createMode) {
         let publicId = this.publicId
@@ -97,6 +100,19 @@ export default {
         return publicId !== this.user?.publicId
       } else {
         return this.publicId !== this.user?.publicId
+      }
+    },
+
+    /**
+     * Method is used in the parent component,
+     * do not use async methods - just simple and plain reverting of values
+     * !! hasChanges method must return true after executing revertChanges method
+     */
+    revertChanges () {
+      if (this.createMode) {
+        this.publicId = ''
+      } else {
+        this.publicId = this.user?.publicId
       }
     },
 

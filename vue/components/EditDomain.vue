@@ -54,7 +54,6 @@
         </q-btn>
       </div>
     </div>
-    <UnsavedChangesDialog ref="unsavedChangesDialog" />
     <q-inner-loading :showing="loading || deleting || creating">
       <q-spinner size="50px" color="primary" />
     </q-inner-loading>
@@ -73,14 +72,8 @@ import cache from '../cache'
 
 import DomainModel from '../classes/domain'
 
-import UnsavedChangesDialog from 'src/components/UnsavedChangesDialog'
-
 export default {
   name: 'EditDomain',
-
-  components: {
-    UnsavedChangesDialog,
-  },
 
   props: {
     deletingIds: Array,
@@ -141,19 +134,11 @@ export default {
   },
 
   beforeRouteLeave (to, from, next) {
-    if (this.hasChanges() && _.isFunction(this?.$refs?.unsavedChangesDialog?.openConfirmDiscardChangesDialog)) {
-      this.$refs.unsavedChangesDialog.openConfirmDiscardChangesDialog(next)
-    } else {
-      next()
-    }
+    this.doBeforeRouteLeave(to, from, next)
   },
 
   beforeRouteUpdate (to, from, next) {
-    if (this.hasChanges() && _.isFunction(this?.$refs?.unsavedChangesDialog?.openConfirmDiscardChangesDialog)) {
-      this.$refs.unsavedChangesDialog.openConfirmDiscardChangesDialog(next)
-    } else {
-      next()
-    }
+    this.doBeforeRouteLeave(to, from, next)
   },
 
   mounted () {
@@ -216,8 +201,20 @@ export default {
       })
     },
 
+    /**
+     * Method is used in doBeforeRouteLeave mixin
+     */
     hasChanges () {
       return this.domainName !== this.domain?.name
+    },
+
+    /**
+     * Method is used in doBeforeRouteLeave mixin,
+     * do not use async methods - just simple and plain reverting of values
+     * !! hasChanges method must return true after executing revertChanges method
+     */
+    revertChanges () {
+      this.domainName = this.domain?.name
     },
 
     isDataValid () {

@@ -98,7 +98,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 			if ($oDomain)
 			{
 				$oServer = $this->getServersManager()->getServer($oDomain->MailServerId);
-				if ($oServer instanceof \Aurora\Modules\Mail\Classes\Server)
+				if ($oServer instanceof \Aurora\Modules\Mail\Models\Server)
 				{
 					$mResult = [
 						'Server'			=> $oServer,

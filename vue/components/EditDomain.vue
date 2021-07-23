@@ -71,11 +71,9 @@ import webApi from 'src/utils/web-api'
 import cache from '../cache'
 
 import DomainModel from '../classes/domain'
-import QItemLabel from "../../../../adminpanel/js/vendor.bb55e053";
 
 export default {
   name: 'EditDomain',
-  components: {QItemLabel},
   props: {
     deletingIds: Array,
   },

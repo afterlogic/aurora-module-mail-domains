@@ -27,14 +27,14 @@
           </div>
         </q-card-section>
         <q-card-section v-if="createMode">
-          <div class="row q-mb-md">
-            <div class="col-1" v-t="'MAILDOMAINS.LABEL_MAILDOMAIN'"></div>
+          <div class="row items-center q-mb-md">
+            <div class="col-2" v-t="'MAILDOMAINS.LABEL_MAILDOMAIN'"></div>
             <div class="col-5">
               <q-input outlined dense bg-color="white" v-model="domainName" ref="domainName" @keyup.enter="create" />
             </div>
           </div>
-          <div class="row q-mb-md">
-            <div class="col-1" v-t="'MAILDOMAINS.LABEL_MAIL_SERVER'"></div>
+          <div class="row items-center q-mb-md">
+            <div class="col-2" v-t="'MAILDOMAINS.LABEL_MAIL_SERVER'"></div>
             <div class="col-5">
               <q-select outlined dense bg-color="white" v-model="selectedServerId"
                         emit-value map-options :options="serverOptions" />
@@ -71,10 +71,11 @@ import webApi from 'src/utils/web-api'
 import cache from '../cache'
 
 import DomainModel from '../classes/domain'
+import QItemLabel from "../../../../adminpanel/js/vendor.bb55e053";
 
 export default {
   name: 'EditDomain',
-
+  components: {QItemLabel},
   props: {
     deletingIds: Array,
   },
@@ -271,6 +272,12 @@ export default {
 }
 </script>
 
-<style scoped>
-
+<style scoped  lang="scss">
+::v-deep a {
+  text-decoration: none;
+  color: darken($primary, 20%);
+}
+::v-deep a:hover {
+  text-decoration: underline;
+}
 </style>

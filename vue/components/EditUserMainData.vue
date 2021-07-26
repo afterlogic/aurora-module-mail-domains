@@ -1,14 +1,14 @@
 <template>
   <div>
     <div class="row q-mb-md" v-if="!createMode">
-      <div class="col-1 q-my-sm" v-t="'COREWEBCLIENT.LABEL_EMAIL'"></div>
+      <div class="col-2 q-my-sm" v-t="'COREWEBCLIENT.LABEL_EMAIL'"></div>
       <div class="col-5">
         <q-input outlined dense bg-color="white" v-model="publicId" ref="publicId" :disable="!createMode"
                  @keyup.enter="save" />
       </div>
     </div>
     <div class="row q-mb-md" v-if="createMode">
-      <div class="col-1 q-my-sm" v-t="'COREWEBCLIENT.LABEL_EMAIL'"></div>
+      <div class="col-2 q-my-sm" v-t="'COREWEBCLIENT.LABEL_EMAIL'"></div>
       <div class="col-3">
         <q-input outlined dense bg-color="white" v-model="publicId" ref="publicId" :disable="!createMode"
                  @keyup.enter="save" />
@@ -19,7 +19,7 @@
       </div>
     </div>
     <div class="row q-mb-md" v-if="createMode">
-      <div class="col-1 q-my-sm" v-t="'COREWEBCLIENT.LABEL_PASSWORD'"></div>
+      <div class="col-2 q-my-sm" v-t="'COREWEBCLIENT.LABEL_PASSWORD'"></div>
       <div class="col-3">
         <q-input outlined dense bg-color="white" v-model="password" ref="password" type="password"
                  autocomplete="new-password" @keyup.enter="save"/>

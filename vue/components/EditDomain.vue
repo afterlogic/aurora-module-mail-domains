@@ -11,7 +11,7 @@
             <div class="col-2" v-t="'MAILDOMAINS.LABEL_MAILDOMAIN'"></div>
             <div class="col-5 q-ml-md"><b>{{ domainName }}</b></div>
           </div>
-          <div class="row q-mb-md" v-if="domainMailServer">
+          <div class="row q-mb-md" v-show="domainMailServer">
             <div class="col-2" v-t="'MAILDOMAINS.LABEL_MAIL_SERVER'"></div>
             <div class="col-5 q-ml-md"><b>{{ domainMailServer }}</b></div>
           </div>
@@ -19,7 +19,7 @@
             <div class="col-2" v-t="'MAILDOMAINS.LABEL_MAILDOMAIN_USERS_COUNT'"></div>
             <div class="col-5 q-ml-md"><b>{{ domainUserCount }}</b></div>
           </div>
-          <div class="row" v-if="domain">
+          <div class="row" v-show="domain">
             <div class="col-6">
               <router-link :to="'/users/domain/' + domain.id" :ripple="false" class="q-px-none"
                            v-t="'MAILDOMAINS.ACTION_SHOW_DOMAIN_USERS'"></router-link>

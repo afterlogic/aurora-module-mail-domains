@@ -21,7 +21,7 @@
           </div>
           <div class="row" v-show="domain">
             <div class="col-6">
-              <router-link :to="'/users/domain/' + domain.id" :ripple="false" class="q-px-none"
+              <router-link :to="'/users/domain/' + (domain ? domain.id : '')" :ripple="false" class="q-px-none"
                            v-t="'MAILDOMAINS.ACTION_SHOW_DOMAIN_USERS'"></router-link>
             </div>
           </div>
@@ -67,8 +67,6 @@ import errors from 'src/utils/errors'
 import notification from 'src/utils/notification'
 import typesUtils from 'src/utils/types'
 import webApi from 'src/utils/web-api'
-
-import cache from '../cache'
 
 import DomainModel from '../classes/domain'
 
@@ -187,17 +185,12 @@ export default {
 
     populate () {
       this.clear()
-      this.loading = true
-      cache.getDomain(this.currentTenantId, this.domain.id).then(({ domain, domainId }) => {
-        if (domainId === this.domain.id) {
-          this.loading = false
-          if (domain) {
-            this.fillUp(domain)
-          } else {
-            this.$emit('no-domain-found')
-          }
-        }
-      })
+      const domain = this.$store.getters['maildomains/getDomain'](this.currentTenantId, this.domain.id)
+      if (domain) {
+        this.fillUp(domain)
+      } else {
+        this.$emit('no-domain-found')
+      }
     },
 
     /**

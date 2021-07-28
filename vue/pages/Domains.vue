@@ -42,8 +42,6 @@ import notification from 'src/utils/notification'
 import typesUtils from 'src/utils/types'
 import webApi from 'src/utils/web-api'
 
-import cache from '../cache'
-
 import ConfirmDialog from 'src/components/ConfirmDialog'
 import Empty from 'src/components/Empty'
 import StandardList from 'src/components/StandardList'
@@ -67,7 +65,6 @@ export default {
     return {
       domains: [],
       selectedDomainId: 0,
-      loadingDomains: false,
       totalCount: 0,
 
       search: '',
@@ -90,6 +87,15 @@ export default {
       return this.$store.getters['tenants/getCurrentTenantId']
     },
 
+    loadingDomains () {
+      return this.$store.getters['maildomains/getLoadingForTenant'] === this.currentTenantId || !_.isEmpty(this.deletingIds)
+    },
+
+    allTenantDomains () {
+      const allDomainLists = this.$store.getters['maildomains/getDomains']
+      return typesUtils.pArray(allDomainLists[this.currentTenantId])
+    },
+
     pagesCount () {
       return Math.ceil(this.totalCount / this.limit)
     },
@@ -105,6 +111,7 @@ export default {
       if (this.$route.path !== '/domains') {
         this.route()
       }
+      this.requestDomains()
       this.populate()
     },
 
@@ -125,6 +132,10 @@ export default {
           this.selectedDomainId = domainId
         }
       }
+    },
+
+    allTenantDomains () {
+      this.populate()
     },
 
     domains () {
@@ -148,25 +159,25 @@ export default {
     this.$router.addRoute('domains', { path: 'page/:page/id/:id', component: EditDomain })
     this.$router.addRoute('domains', { path: 'search/:search/page/:page', component: Empty })
     this.$router.addRoute('domains', { path: 'search/:search/page/:page/id/:id', component: EditDomain })
+    this.requestDomains()
     this.populate()
   },
 
   methods: {
-    populate () {
-      this.loadingDomains = true
-      cache.getPagedDomains(this.currentTenantId, this.search, this.page, this.limit).then(({ domains, totalCount, tenantId, page, search }) => {
-        if (page === this.page && search === this.search) {
-          this.domains = domains
-          this.totalCount = totalCount
-          this.loadingDomains = false
-          if (this.justCreatedId && domains.find(domain => {
-            return domain.id === this.justCreatedId
-          })) {
-            this.route(this.justCreatedId)
-            this.justCreatedId = 0
-          }
-        }
+    requestDomains () {
+      this.$store.dispatch('maildomains/requestDomains', {
+        tenantId: this.currentTenantId
       })
+    },
+
+    populate () {
+      const search = this.search.toLowerCase()
+      const domains = search === ''
+        ? this.allTenantDomains
+        : this.allTenantDomains.filter(tenant => tenant.name.toLowerCase().indexOf(search) !== -1)
+      this.totalCount = domains.length
+      const offset = this.limit * (this.page - 1)
+      this.domains = domains.slice(offset, offset + this.limit)
     },
 
     route (domainId = 0) {
@@ -193,6 +204,7 @@ export default {
     handleCreateDomain (id) {
       this.justCreatedId = id
       this.route()
+      this.requestDomains()
     },
 
     afterCheck (ids) {
@@ -230,7 +242,6 @@ export default {
 
     deleteDomains (ids) {
       this.deletingIds = ids
-      this.loadingDomains = true
       webApi.sendRequest({
         moduleName: 'MailDomains',
         methodName: 'DeleteDomains',
@@ -240,7 +251,6 @@ export default {
         },
       }).then(result => {
         this.deletingIds = []
-        this.loadingDomains = false
         if (result === true) {
           notification.showReport(this.$tc('MAILDOMAINS.REPORT_DELETE_ENTITIES_MAILDOMAIN_PLURAL', ids.length))
           const isSelectedDomainRemoved = ids.indexOf(this.selectedDomainId) !== -1
@@ -257,10 +267,11 @@ export default {
         } else {
           notification.showError(this.$tc('MAILDOMAINS.ERROR_DELETE_ENTITIES_MAILDOMAIN_PLURAL', ids.length))
         }
+        this.requestDomains()
       }, error => {
         this.deletingIds = []
-        this.loadingDomains = false
         notification.showError(errors.getTextFromResponse(error, this.$tc('MAILDOMAINS.ERROR_DELETE_ENTITIES_MAILDOMAIN_PLURAL', ids.length)))
+        this.requestDomains()
       })
     },
   },

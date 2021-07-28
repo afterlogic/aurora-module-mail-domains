@@ -1,37 +1,80 @@
 import Vue from 'vue'
 
 import _ from 'lodash'
+
+import errors from 'src/utils/errors'
+import notification from 'src/utils/notification'
+import typesUtils from 'src/utils/types'
 import webApi from 'src/utils/web-api'
 
+import DomainModel from '../classes/domain'
+
 export default {
-    namespaced: true,
-    state: {
-        domains: [],
+  namespaced: true,
+
+  state: {
+    domains: {},
+    loadingForTenant: null,
+  },
+
+  mutations: {
+    setDomains(state, { tenantId, domains }) {
+      Vue.set(state.domains, tenantId, domains)
     },
-    mutations: {
-        setDomains (state, { tenantId, hash }) {
-            Vue.set(state.domains, tenantId, hash)
-        },
+
+    setLoadingForTenant(state, tenantId) {
+      state.loadingForTenant = tenantId
     },
-    actions: {
-        requestDomains({ state, commit }, { tenantId }) {
-            const parameters = {
-                TenantId: tenantId,
-            }
-            webApi.sendRequest({
-                moduleName: 'MailDomains',
-                methodName: 'GetDomains',
-                parameters,
-            }).then(result => {
-                if (_.isArray(result?.Items)) {
-                    commit('setDomains', { tenantId, hash: result.Items })
-                }
-            })
-        },
+  },
+
+  actions: {
+    requestDomainsIfNecessary({ state, dispatch }, { tenantId }) {
+      if (state.domains[tenantId] === undefined) {
+        dispatch('requestDomains', { tenantId })
+      }
     },
-    getters: {
-        getDomains (state) {
-            return state.domains
-        },
+
+    requestDomains({ state, commit }, { tenantId }) {
+      const parameters = {
+        TenantId: tenantId,
+      }
+      commit('setLoadingForTenant', tenantId)
+      webApi.sendRequest({
+        moduleName: 'MailDomains',
+        methodName: 'GetDomains',
+        parameters,
+      }).then(result => {
+        if (_.isArray(result?.Items)) {
+          const domains = _.map(result.Items, function (data) {
+            return new DomainModel(data)
+          })
+          commit('setDomains', { tenantId, domains })
+        } else {
+          commit('setDomains', { tenantId, domains: [] })
+        }
+        commit('setLoadingForTenant', null)
+      }, response => {
+        notification.showError(errors.getTextFromResponse(response))
+        commit('setDomains', { tenantId, domains: [] })
+        commit('setLoadingForTenant', null)
+      })
     },
+  },
+
+  getters: {
+    getDomains (state) {
+      return state.domains
+    },
+
+    getLoadingForTenant (state) {
+      return state.loadingForTenant
+    },
+
+    getDomain (state) {
+      return function (tenantId, domainId) {
+        const tenantDomains = typesUtils.pArray(state.domains[tenantId])
+        return tenantDomains.find(domain => domain.id === domainId)
+      }
+    },
+  },
 }

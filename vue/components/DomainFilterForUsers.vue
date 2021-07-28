@@ -6,15 +6,15 @@
 </template>
 
 <script>
+import _ from 'lodash'
+
 import notification from 'src/utils/notification'
 import typesUtils from 'src/utils/types'
 
 export default {
   name: 'DomainFilterForUser',
-  filterRoute: 'domain/:domain',
 
-  props: {
-  },
+  filterRoute: 'domain/:domain',
 
   data () {
     return {
@@ -32,8 +32,13 @@ export default {
     visible () {
       return this.filterOptions.length > 0
     },
+
+    allDomainLists () {
+      return this.$store.getters['maildomains/getDomains']
+    },
+
     domains () {
-      return typesUtils.pArray(this.$store.getters['maildomains/getDomains'])
+      return typesUtils.pArray(this.allDomainLists[this.currentTenantId])
     }
   },
 
@@ -56,10 +61,35 @@ export default {
     },
 
     domains () {
-      const options = this.domains[this.currentTenantId].map(domain => {
+      this.fillUpFilterOptions()
+    }
+  },
+
+  mounted () {
+    this.fillUpFilterOptions()
+    this.requestDomains()
+  },
+
+  methods: {
+    requestDomains () {
+      this.$store.dispatch('maildomains/requestDomainsIfNecessary', {
+        tenantId: this.currentTenantId
+      })
+    },
+
+    checkDomains () {
+      const domains = this.allDomainLists[this.currentTenantId]
+      this.$emit('allow-create-user', { tenantId: this.currentTenantId, allowCreateUser: _.isArray(domains) && domains.length > 0 })
+      if (_.isArray(domains) && domains.length === 0) {
+        notification.showError(this.$t('MAILDOMAINS.ERROR_ADD_DOMAIN_FIRST'))
+      }
+    },
+
+    fillUpFilterOptions () {
+      const options = this.domains.map(domain => {
         return {
-          label: domain.Name,
-          value: domain.Id,
+          label: domain.name,
+          value: domain.id,
         }
       })
       if (options.length > 0) {
@@ -74,22 +104,7 @@ export default {
       }
       this.filterOptions = options
       this.currentFilter = this.findCurrentFilter()
-      this.$emit('allow-create-user', { tenantId: this.currentTenantId, allowCreateUser: options.length > 0 })
-      if (options.length === 0) {
-        notification.showError(this.$t('MAILDOMAINS.ERROR_ADD_DOMAIN_FIRST'))
-      }
-    }
-  },
-
-  mounted () {
-    this.requestDomains()
-  },
-
-  methods: {
-    requestDomains () {
-      this.$store.dispatch('maildomains/requestDomains', {
-        tenantId: this.currentTenantId
-      })
+      this.checkDomains()
     },
 
     findCurrentFilter () {

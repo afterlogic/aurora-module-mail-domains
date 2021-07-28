@@ -36,8 +36,7 @@
 import _ from 'lodash'
 
 import notification from 'src/utils/notification'
-
-import cache from '../cache'
+import typesUtils from 'src/utils/types'
 
 export default {
   name: 'EditUserPublicId',
@@ -45,15 +44,24 @@ export default {
   props: {
     user: Object,
     createMode: Boolean,
-    currentTenantId: Number,
   },
 
   data () {
     return {
       publicId: '',
       password: '',
-      domains: [],
       selectedDomain: null,
+    }
+  },
+
+  computed: {
+    currentTenantId () {
+      return this.$store.getters['tenants/getCurrentTenantId']
+    },
+
+    domains () {
+      const allDomainLists = this.$store.getters['maildomains/getDomains']
+      return typesUtils.pArray(allDomainLists[this.currentTenantId])
     }
   },
 
@@ -61,26 +69,32 @@ export default {
     user () {
       this.publicId = this.user?.publicId
     },
+
+    currentTenantId () {
+      this.requestDomains()
+    },
   },
 
   mounted () {
+    this.requestDomains()
     this.populate()
   },
 
   methods: {
+    requestDomains () {
+      this.$store.dispatch('maildomains/requestDomainsIfNecessary', {
+        tenantId: this.currentTenantId
+      })
+    },
+
     populate () {
       this.publicId = this.user?.publicId
       this.password = ''
-      this.domains = []
-      cache.getDomains(this.currentTenantId).then(({ domains, totalCount, tenantId }) => {
-        if (tenantId === this.currentTenantId) {
-          this.domains = domains
-          if (this.domains.length > 0) {
-            this.selectedDomain = this.domains[0]
-          }
-        }
-      })
+      if (this.selectedDomain === null && this.domains.length > 0) {
+        this.selectedDomain = this.domains[0]
+      }
     },
+
     getSaveParameters () {
       const parameters = {
         PublicId: this.createMode ? this.publicId + '@' + this.selectedDomain?.name : this.user?.publicId,

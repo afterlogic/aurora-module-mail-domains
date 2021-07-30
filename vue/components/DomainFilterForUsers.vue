@@ -20,7 +20,7 @@ export default {
     return {
       filterOptions: [],
       filterValue: null,
-      currentFilter: ''
+      currentFilter: null,
     }
   },
 
@@ -123,10 +123,16 @@ export default {
     },
 
     selectFilter (value) {
-      this.$emit('filter-selected', {
-        routeName: 'domain',
-        routeValue: value,
-      })
+      if (value === -1) {
+        this.$emit('filter-selected', {
+          routeName: 'domain',
+        })
+      } else {
+        this.$emit('filter-selected', {
+          routeName: 'domain',
+          routeValue: value,
+        })
+      }
     },
   },
 }

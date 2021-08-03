@@ -50,6 +50,7 @@ export default {
 
     filterOptions () {
       this.fillUpFilterValue()
+      this.currentFilter = this.findCurrentFilter()
     },
 
     currentTenantId () {

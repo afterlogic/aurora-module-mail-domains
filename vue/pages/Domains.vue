@@ -78,7 +78,7 @@ export default {
 
       deletingIds: [],
 
-      listSplitterWidth: 20,
+      listSplitterWidth: localStorage.getItem('domains-list-splitter-width') || 20,
     }
   },
 
@@ -148,6 +148,10 @@ export default {
         }
       })
     },
+
+    listSplitterWidth () {
+      localStorage.setItem('domains-list-splitter-width', this.listSplitterWidth)
+    }
   },
 
   mounted () {

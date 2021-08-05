@@ -71,11 +71,11 @@ export default {
     },
 
     publicId () {
-      this.changeStatusRequiredFields ()
+      this.changeStatusRequiredFields()
     },
 
     password () {
-      this.changeStatusRequiredFields ()
+      this.changeStatusRequiredFields()
     },
 
     currentTenantId () {
@@ -166,8 +166,8 @@ export default {
 
     changeStatusRequiredFields () {
       this.publicId.length && this.password.length
-          ? this.$emit('changeStatusRequiredFields', true)
-          : this.$emit('changeStatusRequiredFields', false)
+        ? this.$emit('changeStatusRequiredFields', true)
+        : this.$emit('changeStatusRequiredFields', false)
     },
   },
 }

@@ -67,7 +67,7 @@ export default {
 
   watch: {
     user () {
-      this.publicId = this.user?.publicId
+      this.publicId = typesUtils.pString(this.user?.publicId)
     },
 
     publicId () {

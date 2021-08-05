@@ -39,7 +39,7 @@ import notification from 'src/utils/notification'
 import typesUtils from 'src/utils/types'
 
 export default {
-  name: 'EditUserPublicId',
+  name: 'EditMailDomainsUserMainData',
 
   props: {
     user: Object,
@@ -96,7 +96,7 @@ export default {
     },
 
     populate () {
-      this.publicId = this.user?.publicId
+      this.publicId = typesUtils.pString(this.user?.publicId)
       this.password = ''
       if (this.selectedDomain === null && this.domains.length > 0) {
         this.selectedDomain = this.domains[0]
@@ -138,7 +138,7 @@ export default {
       if (this.createMode) {
         this.publicId = ''
       } else {
-        this.publicId = this.user?.publicId
+        this.publicId = typesUtils.pString(this.user?.publicId)
       }
     },
 

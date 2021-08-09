@@ -86,6 +86,7 @@ export default {
   mounted () {
     this.requestDomains()
     this.populate()
+    this.changeStatusRequiredFields()
   },
 
   methods: {

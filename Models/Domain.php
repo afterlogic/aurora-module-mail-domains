@@ -21,6 +21,8 @@ namespace Aurora\Modules\MailDomains\Models;
  */
 class Domain extends \Aurora\System\Classes\Model
 {
+    protected $table = 'mail_domains';
+
 	protected $moduleName = 'MailDomains';
 
     /**

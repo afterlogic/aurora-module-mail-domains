@@ -13,7 +13,7 @@ class CreateDomainsTable extends Migration
      */
     public function up()
     {
-        Capsule::schema()->create('domains', function (Blueprint $table) {
+        Capsule::schema()->create('mail_domains', function (Blueprint $table) {
             $table->increments('Id');
             $table->integer('TenantId')->default(0);
             $table->integer('MailServerId')->default(0);
@@ -33,6 +33,6 @@ class CreateDomainsTable extends Migration
      */
     public function down()
     {
-        Capsule::schema()->dropIfExists('domains');
+        Capsule::schema()->dropIfExists('mail_domains');
     }
 }

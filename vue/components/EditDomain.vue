@@ -37,7 +37,11 @@
             <div class="col-2" v-t="'MAILDOMAINS.LABEL_MAIL_SERVER'"></div>
             <div class="col-5">
               <q-select outlined dense bg-color="white" v-model="selectedServerId"
-                        emit-value map-options :options="serverOptions" />
+                        emit-value map-options :options="serverOptions">
+                <template v-slot:selected>
+                  <div class="ellipsis">{{ selectedServerLabel }}</div>
+                </template>
+              </q-select>
             </div>
           </div>
         </q-card-section>
@@ -118,6 +122,13 @@ export default {
     deleting () {
       return this.deletingIds.indexOf(this.domain?.id) !== -1
     },
+
+    selectedServerLabel () {
+      const selectedServerOption = this.serverOptions.find(option => {
+        return option.value === this.selectedServerId
+      })
+      return selectedServerOption?.label || ''
+    }
   },
 
   watch: {

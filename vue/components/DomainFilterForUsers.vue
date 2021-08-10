@@ -1,7 +1,11 @@
 <template>
   <div v-if="filterOptions.length > 0">
     <q-select outlined dense class="bg-white domains-select"
-              v-model="currentFilter" :options="filterOptions"/>
+              v-model="currentFilter" :options="filterOptions">
+      <template v-slot:selected>
+        <div class="ellipsis">{{ currentFilter.label }}</div>
+      </template>
+    </q-select>
   </div>
 </template>
 

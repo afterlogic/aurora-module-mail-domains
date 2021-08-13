@@ -51,15 +51,15 @@
                :label="$t('MAILDOMAINS.ACTION_DELETE_MAILDOMAIN')" v-if="!createMode">
         </q-btn>
         <q-btn unelevated no-caps dense class="q-px-sm q-ml-sm" :ripple="false" color="primary" @click="create"
-               :label="creating ? $t('COREWEBCLIENT.ACTION_CREATE_IN_PROGRESS') : $t('MAILDOMAINS.ACTION_ADD')" v-if="createMode">
+               :label="$t('MAILDOMAINS.ACTION_ADD')" v-if="createMode">
         </q-btn>
         <q-btn unelevated no-caps dense class="q-px-sm q-ml-sm" :ripple="false" color="secondary" @click="cancel"
                :label="$t('COREWEBCLIENT.ACTION_CANCEL')" v-if="createMode" >
         </q-btn>
       </div>
     </div>
-    <q-inner-loading :showing="loading || deleting || creating">
-      <q-spinner size="50px" color="primary" />
+    <q-inner-loading style="justify-content: flex-start;" :showing="loading || deleting || creating">
+      <q-linear-progress query />
     </q-inner-loading>
   </q-scroll-area>
 </template>

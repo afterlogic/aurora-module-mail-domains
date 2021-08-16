@@ -31,6 +31,7 @@ class Domain extends \Aurora\System\Classes\Model
      * @var array
      */
     protected $fillable = [
+        'Id',
         'TenantId',
         'MailServerId',
         'Name',

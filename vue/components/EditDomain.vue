@@ -58,7 +58,7 @@
         </q-btn>
       </div>
     </div>
-    <q-inner-loading style="justify-content: flex-start;" :showing="loading || deleting || creating">
+    <q-inner-loading style="justify-content: flex-start;" :showing="deleting || creating">
       <q-linear-progress query />
     </q-inner-loading>
   </q-scroll-area>
@@ -89,7 +89,6 @@ export default {
       domainMailServerId: '',
       domainUserCount: 0,
 
-      loading: false,
       creating: false,
     }
   },
@@ -151,7 +150,6 @@ export default {
 
   mounted () {
     this.$store.dispatch('mail/requestTenantServers', this.currentTenantId)
-    this.loading = false
     this.creating = false
     this.parseRoute()
   },

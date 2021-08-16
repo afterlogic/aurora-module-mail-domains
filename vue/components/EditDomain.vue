@@ -33,7 +33,7 @@
               <q-input outlined dense bg-color="white" v-model="domainName" ref="domainName" @keyup.enter="create" />
             </div>
           </div>
-          <div class="row items-center q-mb-md">
+          <div class="row items-center">
             <div class="col-2" v-t="'MAILDOMAINS.LABEL_MAIL_SERVER'"></div>
             <div class="col-5">
               <q-select outlined dense bg-color="white" v-model="selectedServerId"

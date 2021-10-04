@@ -378,9 +378,9 @@ class Module extends \Aurora\System\Module\AbstractModule
 		else
 		{//get all domains for all tenants
 			$aDomains = $this->getDomainsManager()->getFullDomainsList();
-			$mResult = array_map(function ($oDomain) {
+			$mResult = $aDomains->map(function ($oDomain) {
 				return $oDomain->Name;
-			}, $aDomains);
+			}, $aDomains)->toArray();
 		}
 	}
 

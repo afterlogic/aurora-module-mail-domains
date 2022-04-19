@@ -42,10 +42,10 @@ class UpdateMailDomainsIndexes extends Migration
             $doctrineTable = $sm->listTableDetails($prefix . 'mail_domains');
 
             if ($doctrineTable->hasIndex('mail_domains_tenantid_index')) {
-                $table->dropIndex('TenantId');
+                $table->dropIndex(['TenantId']);
             }
             if ($doctrineTable->hasIndex('mail_domains_mailserverid_index')) {
-                $table->dropIndex('MailserverId');
+                $table->dropIndex(['MailserverId']);
             }
         });
     }

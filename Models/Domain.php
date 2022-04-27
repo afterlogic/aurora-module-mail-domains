@@ -35,7 +35,8 @@ class Domain extends \Aurora\System\Classes\Model
         'TenantId',
         'MailServerId',
         'Name',
-        'Count'
+        'Count',
+        'Properties'
     ];
 
     /**

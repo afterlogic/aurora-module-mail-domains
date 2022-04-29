@@ -1,6 +1,7 @@
 <template>
-  <q-splitter class="full-height full-width" after-class="q-splitter__right-panel" v-model="listSplitterWidth"
-              :limits="[10,30]">
+  <q-splitter :after-class="!showTabs ? 'q-splitter__right-panel' : ''" class="full-height full-width"
+              v-model="listSplitterWidth" :limits="[10,30]"
+  >
     <template v-slot:before>
       <div class="flex column full-height">
         <q-toolbar class="col-auto q-my-sm">
@@ -27,7 +28,38 @@
       </div>
     </template>
     <template v-slot:after>
-      <router-view @no-domain-found="handleNoDomainFound" @domain-created="handleCreateDomain"
+      <q-splitter after-class="q-splitter__right-panel" v-if="showTabs" class="full-height full-width"
+                  v-model="tabsSplitterWidth" :limits="[10,30]">
+        <template v-slot:before>
+          <q-list>
+            <div>
+              <q-item clickable @click="route(selectedDomainId)" :class="selectedTab === '' ? 'bg-selected-item' : ''">
+                <q-item-section>
+                  <q-item-label lines="1" v-t="'ADMINPANELWEBCLIENT.LABEL_COMMON_SETTINGS_TAB'"></q-item-label>
+                </q-item-section>
+              </q-item>
+              <q-separator/>
+            </div>
+            <div v-for="tab in tabs" :key="tab.tabName">
+              <q-item clickable @click="route(selectedDomainId, tab.tabName)"
+                      :class="selectedTab === tab.tabName ? 'bg-selected-item' : ''">
+                <q-item-section>
+                  <q-item-label lines="1">{{ $t(tab.title) }}</q-item-label>
+                </q-item-section>
+              </q-item>
+              <q-separator/>
+            </div>
+            <q-inner-loading style="justify-content: flex-start;" :showing="deleting">
+              <q-linear-progress query/>
+            </q-inner-loading>
+          </q-list>
+        </template>
+        <template v-slot:after>
+          <router-view @no-domain-found="handleNoDomainFound" @domain-created="handleCreateDomain"
+                       @cancel-create="route" @delete-domain="askDeleteDomain" :deletingIds="deletingIds"></router-view>
+        </template>
+      </q-splitter>
+      <router-view v-if="!showTabs" @no-domain-found="handleNoDomainFound" @domain-created="handleCreateDomain"
                    @cancel-create="route" @delete-domain="askDeleteDomain" :deletingIds="deletingIds"></router-view>
     </template>
     <ConfirmDialog ref="confirmDialog"/>
@@ -50,6 +82,7 @@ import EditDomain from '../components/EditDomain'
 
 import Add from 'src/assets/icons/Add'
 import Trash from 'src/assets/icons/Trash'
+import modulesManager from "../../../AdminPanelWebclient/vue/src/modules-manager";
 
 export default {
   name: 'Domains',
@@ -78,7 +111,11 @@ export default {
 
       deletingIds: [],
 
-      listSplitterWidth: localStorage.getItem('domains-list-splitter-width') || 20,
+      tabs: [],
+      selectedTab: '',
+
+      listSplitterWidth: typesUtils.pInt(localStorage.getItem('domains-list-splitter-width'), 20),
+      tabsSplitterWidth: typesUtils.pInt(localStorage.getItem('domains-tabs-splitter-width'), 20),
     }
   },
 
@@ -103,6 +140,14 @@ export default {
     countLabel () {
       const count = this.checkedIds.length
       return count > 0 ? count : ''
+    },
+
+    deleting () {
+      return this.deletingIds.indexOf(this.selectedUserId) !== -1
+    },
+
+    showTabs () {
+      return this.tabs.length > 0 && this.selectedDomainId > 0
     },
   },
 
@@ -131,6 +176,11 @@ export default {
         if (this.selectedDomainId !== domainId) {
           this.selectedDomainId = domainId
         }
+
+        const pathParts = this.$route.path.split('/')
+        const lastPart = pathParts.length > 0 ? pathParts[pathParts.length - 1] : ''
+        const tab = this.tabs.find(tab => { return tab.tabName === lastPart })
+        this.selectedTab = tab ? tab.tabName : ''
       }
     },
 
@@ -151,7 +201,11 @@ export default {
 
     listSplitterWidth () {
       localStorage.setItem('domains-list-splitter-width', this.listSplitterWidth)
-    }
+    },
+
+    tabsSplitterWidth (tabsSplitterWidth) {
+      localStorage.setItem('domains-tabs-splitter-width', tabsSplitterWidth)
+    },
   },
 
   mounted () {
@@ -164,6 +218,7 @@ export default {
     this.$router.addRoute('domains', { path: 'search/:search/page/:page', component: Empty })
     this.$router.addRoute('domains', { path: 'search/:search/page/:page/id/:id', component: EditDomain })
     this.requestDomains()
+    this.populateTabs()
     this.populate()
   },
 
@@ -171,6 +226,22 @@ export default {
     requestDomains () {
       this.$store.dispatch('maildomains/requestDomains', {
         tenantId: this.currentTenantId
+      })
+    },
+
+    populateTabs () {
+      const tabsRoutes = []
+      this.tabs = modulesManager.getAdminEntityTabs('getAdminDomainTabs')
+      _.each(this.tabs, (tab) => {
+        if (typesUtils.isNonEmptyArray(tab.paths)) {
+          tab.paths.forEach(path => {
+            this.$router.addRoute('domains', { path, component: tab.component })
+            tabsRoutes.push({ path, component: tab.component })
+          })
+        } else {
+          this.$router.addRoute('domains', { path: tab.tabName, component: tab.component })
+          tabsRoutes.push({ path: tab.tabName, component: tab.component })
+        }
       })
     },
 
@@ -184,7 +255,7 @@ export default {
       this.domains = domains.slice(offset, offset + this.limit)
     },
 
-    route (domainId = 0) {
+    route (domainId = 0, tabName = '') {
       const enteredSearch = this.$refs?.domainList?.enteredSearch || ''
       const searchRoute = enteredSearch !== '' ? `/search/${enteredSearch}` : ''
 
@@ -195,7 +266,8 @@ export default {
       const pageRoute = selectedPage > 1 ? `/page/${selectedPage}` : ''
 
       const idRoute = domainId > 0 ? `/id/${domainId}` : ''
-      const path = '/domains' + searchRoute + pageRoute + idRoute
+      const tabRoute = tabName !== '' ? `/${tabName}` : ''
+      const path = '/domains' + searchRoute + pageRoute + idRoute + tabRoute
       if (path !== this.$route.path) {
         this.$router.push(path)
       }

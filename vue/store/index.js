@@ -25,6 +25,12 @@ export default {
     setLoadingForTenant(state, tenantId) {
       state.loadingForTenant = tenantId
     },
+  
+    setDomainData ({ getters }, { domain, domainData }) {
+      for (const key in domainData) {
+        Vue.set(domain.data, key, domainData[key])
+      }
+    },
   },
 
   actions: {
@@ -34,7 +40,7 @@ export default {
       }
     },
 
-    requestDomains({ state, commit }, { tenantId }) {
+    requestDomains({ commit }, { tenantId }) {
       const parameters = {
         TenantId: tenantId,
       }
@@ -58,6 +64,11 @@ export default {
         commit('setDomains', { tenantId, domains: [] })
         commit('setLoadingForTenant', null)
       })
+    },
+
+    setDomainData ({ getters, commit }, { tenantId, domainId, domainData }) {
+      const domain = getters['getDomain'](tenantId, domainId)
+      commit('setDomainData', { domain, domainData })
     },
   },
 

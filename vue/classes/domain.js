@@ -7,6 +7,8 @@ class DomainModel {
     this.id = typesUtils.pInt(data?.Id)
     this.name = typesUtils.pString(data?.Name)
     this.count = typesUtils.pInt(data?.Count)
+
+    this.data = data
   }
 }
 

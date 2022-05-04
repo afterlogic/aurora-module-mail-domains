@@ -56,12 +56,22 @@ class Domain extends \Aurora\System\Classes\Model
 
 	public function toResponseArray()
 	{
-		return [
+		$aRes = [
 			'Id' => $this->Id,
 			'TenantId' => $this->TenantId,
 			'MailServerId' => $this->MailServerId,
 			'Name' => $this->Name,
 			'Count' => $this->Count,
 		];
+
+        $aArgs = ['Domain' => $this];
+		\Aurora\System\EventEmitter::getInstance()->emit(
+			$this->moduleName, 
+            'Domain::ToResponseArray',
+			$aArgs,
+			$aRes
+		);
+
+        return $aRes;
 	}
 }

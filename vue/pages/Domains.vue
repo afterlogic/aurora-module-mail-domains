@@ -4,7 +4,7 @@
   >
     <template v-slot:before>
       <div class="flex column full-height">
-        <q-toolbar class="col-auto q-my-sm">
+        <q-toolbar class="col-auto q-py-sm list-border">
           <q-btn flat color="grey-8" size="mg" no-wrap :disable="checkedIds.length === 0"
                  @click="askDeleteCheckedDomains">
             <Trash></Trash>
@@ -20,7 +20,7 @@
             </q-tooltip>
           </q-btn>
         </q-toolbar>
-        <StandardList class="col-grow" :items="domainItems" :selectedItem="selectedDomainId" :loading="loadingDomains"
+        <StandardList class="col-grow list-border" :items="domainItems" :selectedItem="selectedDomainId" :loading="loadingDomains"
                       :search="search" :page="page" :pagesCount="pagesCount"
                       :noItemsText="'MAILDOMAINS.INFO_NO_ENTITIES_MAILDOMAIN'"
                       :noItemsFoundText="'MAILDOMAINS.INFO_NO_ENTITIES_FOUND_MAILDOMAIN'"

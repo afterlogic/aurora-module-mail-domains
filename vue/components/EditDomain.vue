@@ -98,6 +98,11 @@ export default {
       return this.$store.getters['tenants/getCurrentTenantId']
     },
 
+    isDomainsReceived () {
+      const allDomainLists = this.$store.getters['maildomains/getDomains']
+      return _.isArray(allDomainLists[this.currentTenantId])
+    },
+
     serverOptions () {
       const serversByTenants = this.$store.getters['mail/getServersByTenants']
       const tenantServers = typesUtils.pArray(serversByTenants[this.currentTenantId])
@@ -138,6 +143,12 @@ export default {
     serverOptions () {
       this.setSelectedServerId()
     },
+
+    isDomainsReceived () {
+      if (this.isDomainsReceived && !this.createMode) {
+        this.parseRoute()
+      }
+    },
   },
 
   beforeRouteLeave (to, from, next) {
@@ -159,7 +170,7 @@ export default {
       if (this.$route.path === '/domains/create') {
         const domain = new DomainModel({ TenantId: this.currentTenantId })
         this.fillUp(domain)
-      } else {
+      } else if (this.isDomainsReceived) {
         const domainId = typesUtils.pPositiveInt(this.$route?.params?.id)
         if (this.domain?.id !== domainId) {
           this.domain = {
@@ -197,7 +208,7 @@ export default {
       const domain = this.$store.getters['maildomains/getDomain'](this.currentTenantId, this.domain.id)
       if (domain) {
         this.fillUp(domain)
-      } else {
+      } else if (this.isDomainsReceived) {
         this.$emit('no-domain-found')
       }
     },

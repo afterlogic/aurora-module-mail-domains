@@ -1,93 +1,94 @@
 <template>
-  <q-splitter :after-class="!showTabs ? 'q-splitter__right-panel' : ''" class="full-height full-width"
-              v-model="listSplitterWidth" :limits="[10,30]"
-  >
-    <template v-slot:before>
-      <div class="flex column full-height">
-        <q-toolbar class="col-auto q-py-sm list-border">
-          <q-btn flat color="grey-8" size="mg" no-wrap :disable="checkedIds.length === 0"
-                 @click="askDeleteCheckedDomains">
-            <Trash></Trash>
-            <span>{{ countLabel }}</span>
-            <q-tooltip>
-              {{ $t('COREWEBCLIENT.ACTION_DELETE') }}
-            </q-tooltip>
-          </q-btn>
-          <q-btn flat color="grey-8" size="mg" @click="routeCreateDomain">
-            <Add></Add>
-            <q-tooltip>
-              {{ $t('MAILDOMAINS.ACTION_ADD_ENTITY_MAILDOMAIN') }}
-            </q-tooltip>
-          </q-btn>
-        </q-toolbar>
-        <StandardList class="col-grow list-border" :items="domainItems" :selectedItem="selectedDomainId" :loading="loadingDomains"
-                      :search="search" :page="page" :pagesCount="pagesCount"
-                      :noItemsText="'MAILDOMAINS.INFO_NO_ENTITIES_MAILDOMAIN'"
-                      :noItemsFoundText="'MAILDOMAINS.INFO_NO_ENTITIES_FOUND_MAILDOMAIN'"
-                      ref="domainList" @route="route" @check="afterCheck"/>
-      </div>
-    </template>
-    <template v-slot:after>
-      <q-splitter after-class="q-splitter__right-panel" v-if="showTabs" class="full-height full-width"
-                  v-model="tabsSplitterWidth" :limits="[10,30]">
-        <template v-slot:before>
-          <q-list>
-            <div>
-              <q-item clickable @click="route(selectedDomainId)" :class="selectedTab === '' ? 'bg-selected-item' : ''">
-                <q-item-section>
-                  <q-item-label lines="1" v-t="'ADMINPANELWEBCLIENT.LABEL_COMMON_SETTINGS_TAB'"></q-item-label>
-                </q-item-section>
-              </q-item>
-              <q-separator/>
-            </div>
-            <div v-for="tab in tabs" :key="tab.tabName">
-              <q-item clickable @click="route(selectedDomainId, tab.tabName)"
-                      :class="selectedTab === tab.tabName ? 'bg-selected-item' : ''">
-                <q-item-section>
-                  <q-item-label lines="1">{{ $t(tab.title) }}</q-item-label>
-                </q-item-section>
-              </q-item>
-              <q-separator/>
-            </div>
-            <q-inner-loading style="justify-content: flex-start;" :showing="deleting">
-              <q-linear-progress query/>
-            </q-inner-loading>
-          </q-list>
-        </template>
-        <template v-slot:after>
-          <router-view @no-domain-found="handleNoDomainFound" @domain-created="handleCreateDomain"
-                       @cancel-create="route" @delete-domain="askDeleteDomain" :deletingIds="deletingIds"></router-view>
-        </template>
-      </q-splitter>
-      <router-view v-if="!showTabs" @no-domain-found="handleNoDomainFound" @domain-created="handleCreateDomain"
-                   @cancel-create="route" @delete-domain="askDeleteDomain" :deletingIds="deletingIds"></router-view>
-    </template>
-    <ConfirmDialog ref="confirmDialog"/>
-  </q-splitter>
+  <main-layout>
+    <q-splitter :after-class="!showTabs ? 'q-splitter__right-panel' : ''" class="full-height full-width"
+                v-model="listSplitterWidth" :limits="[10,30]"
+    >
+      <template v-slot:before>
+        <div class="flex column full-height">
+          <q-toolbar class="col-auto q-py-sm list-border">
+            <q-btn flat color="grey-8" size="mg" no-wrap :disable="checkedIds.length === 0"
+                   @click="askDeleteCheckedDomains">
+              <Trash></Trash>
+              <span>{{ countLabel }}</span>
+              <q-tooltip>
+                {{ $t('COREWEBCLIENT.ACTION_DELETE') }}
+              </q-tooltip>
+            </q-btn>
+            <q-btn flat color="grey-8" size="mg" @click="routeCreateDomain">
+              <Add></Add>
+              <q-tooltip>
+                {{ $t('MAILDOMAINS.ACTION_ADD_ENTITY_MAILDOMAIN') }}
+              </q-tooltip>
+            </q-btn>
+          </q-toolbar>
+          <StandardList class="col-grow list-border" :items="domainItems" :selectedItem="selectedDomainId" :loading="loadingDomains"
+                        :search="search" :page="page" :pagesCount="pagesCount"
+                        :noItemsText="'MAILDOMAINS.INFO_NO_ENTITIES_MAILDOMAIN'"
+                        :noItemsFoundText="'MAILDOMAINS.INFO_NO_ENTITIES_FOUND_MAILDOMAIN'"
+                        ref="domainList" @route="route" @check="afterCheck"/>
+        </div>
+      </template>
+      <template v-slot:after>
+        <q-splitter after-class="q-splitter__right-panel" v-if="showTabs" class="full-height full-width"
+                    v-model="tabsSplitterWidth" :limits="[10,30]">
+          <template v-slot:before>
+            <q-list>
+              <div>
+                <q-item clickable @click="route(selectedDomainId)" :class="selectedTab === '' ? 'bg-selected-item' : ''">
+                  <q-item-section>
+                    <q-item-label lines="1" v-t="'ADMINPANELWEBCLIENT.LABEL_COMMON_SETTINGS_TAB'"></q-item-label>
+                  </q-item-section>
+                </q-item>
+                <q-separator/>
+              </div>
+              <div v-for="tab in tabs" :key="tab.tabName">
+                <q-item clickable @click="route(selectedDomainId, tab.tabName)"
+                        :class="selectedTab === tab.tabName ? 'bg-selected-item' : ''">
+                  <q-item-section>
+                    <q-item-label lines="1">{{ $t(tab.tabTitle) }}</q-item-label>
+                  </q-item-section>
+                </q-item>
+                <q-separator/>
+              </div>
+              <q-inner-loading style="justify-content: flex-start;" :showing="deleting">
+                <q-linear-progress query/>
+              </q-inner-loading>
+            </q-list>
+          </template>
+          <template v-slot:after>
+            <router-view @no-domain-found="handleNoDomainFound" @domain-created="handleCreateDomain"
+                         @cancel-create="route" @delete-domain="askDeleteDomain" :deletingIds="deletingIds"></router-view>
+          </template>
+        </q-splitter>
+        <router-view v-if="!showTabs" @no-domain-found="handleNoDomainFound" @domain-created="handleCreateDomain"
+                     @cancel-create="route" @delete-domain="askDeleteDomain" :deletingIds="deletingIds"></router-view>
+      </template>
+      <ConfirmDialog ref="confirmDialog"/>
+    </q-splitter>
+  </main-layout>
 </template>
 
 <script>
 import _ from 'lodash'
 
 import errors from 'src/utils/errors'
+import modulesManager from 'src/modules-manager'
 import notification from 'src/utils/notification'
 import typesUtils from 'src/utils/types'
 import webApi from 'src/utils/web-api'
 
 import ConfirmDialog from 'src/components/ConfirmDialog'
-import Empty from 'src/components/Empty'
 import StandardList from 'src/components/StandardList'
 
-import EditDomain from '../components/EditDomain'
-
+import MainLayout from 'src/layouts/MainLayout'
 import Add from 'src/assets/icons/Add'
 import Trash from 'src/assets/icons/Trash'
-import modulesManager from "../../../AdminPanelWebclient/vue/src/modules-manager";
 
 export default {
   name: 'Domains',
 
   components: {
+    MainLayout,
     ConfirmDialog,
     StandardList,
     Add,
@@ -161,27 +162,7 @@ export default {
     },
 
     $route (to, from) {
-      if (this.$route.path === '/domains/create') {
-        this.selectedDomainId = 0
-      } else {
-        const search = typesUtils.pString(this.$route?.params?.search)
-        const page = typesUtils.pPositiveInt(this.$route?.params?.page)
-        if (this.search !== search || this.page !== page || this.justCreatedId !== 0) {
-          this.search = search
-          this.page = page
-          this.populate()
-        }
-
-        const domainId = typesUtils.pNonNegativeInt(this.$route?.params?.id)
-        if (this.selectedDomainId !== domainId) {
-          this.selectedDomainId = domainId
-        }
-
-        const pathParts = this.$route.path.split('/')
-        const lastPart = pathParts.length > 0 ? pathParts[pathParts.length - 1] : ''
-        const tab = this.tabs.find(tab => { return tab.tabName === lastPart })
-        this.selectedTab = tab ? tab.tabName : ''
-      }
+      this.parseRoute()
     },
 
     allTenantDomains () {
@@ -209,17 +190,10 @@ export default {
   },
 
   mounted () {
-    this.$router.addRoute('domains', { path: 'id/:id', component: EditDomain })
-    this.$router.addRoute('domains', { path: 'create', component: EditDomain })
-    this.$router.addRoute('domains', { path: 'search/:search', component: Empty })
-    this.$router.addRoute('domains', { path: 'search/:search/id/:id', component: EditDomain })
-    this.$router.addRoute('domains', { path: 'page/:page', component: Empty })
-    this.$router.addRoute('domains', { path: 'page/:page/id/:id', component: EditDomain })
-    this.$router.addRoute('domains', { path: 'search/:search/page/:page', component: Empty })
-    this.$router.addRoute('domains', { path: 'search/:search/page/:page/id/:id', component: EditDomain })
     this.requestDomains()
     this.populateTabs()
     this.populate()
+    this.parseRoute()
   },
 
   methods: {
@@ -229,18 +203,35 @@ export default {
       })
     },
 
+    parseRoute () {
+      if (this.$route.path === '/domains/create') {
+        this.selectedDomainId = 0
+      } else {
+        const search = typesUtils.pString(this.$route?.params?.search)
+        const page = typesUtils.pPositiveInt(this.$route?.params?.page)
+        if (this.search !== search || this.page !== page || this.justCreatedId !== 0) {
+          this.search = search
+          this.page = page
+          this.populate()
+        }
+
+        const domainId = typesUtils.pNonNegativeInt(this.$route?.params?.id)
+        if (this.selectedDomainId !== domainId) {
+          this.selectedDomainId = domainId
+        }
+
+        const pathParts = this.$route.path.split('/')
+        const lastPart = pathParts.length > 0 ? pathParts[pathParts.length - 1] : ''
+        const tab = this.tabs.find(tab => { return tab.tabName === lastPart })
+        this.selectedTab = tab ? tab.tabName : ''
+      }
+    },
+
     populateTabs () {
-      const tabsRoutes = []
-      this.tabs = modulesManager.getAdminEntityTabs('getAdminDomainTabs')
-      _.each(this.tabs, (tab) => {
-        if (typesUtils.isNonEmptyArray(tab.paths)) {
-          tab.paths.forEach(path => {
-            this.$router.addRoute('domains', { path, component: tab.component })
-            tabsRoutes.push({ path, component: tab.component })
-          })
-        } else {
-          this.$router.addRoute('domains', { path: tab.tabName, component: tab.component })
-          tabsRoutes.push({ path: tab.tabName, component: tab.component })
+      this.tabs = modulesManager.getAdminEntityTabs('getAdminDomainTabs').map(tab => {
+        return {
+          tabName: tab.tabName,
+          tabTitle: tab.tabTitle,
         }
       })
     },

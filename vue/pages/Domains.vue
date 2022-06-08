@@ -77,10 +77,10 @@ import notification from 'src/utils/notification'
 import typesUtils from 'src/utils/types'
 import webApi from 'src/utils/web-api'
 
+import MainLayout from 'src/layouts/MainLayout'
 import ConfirmDialog from 'src/components/ConfirmDialog'
 import StandardList from 'src/components/StandardList'
 
-import MainLayout from 'src/layouts/MainLayout'
 import Add from 'src/assets/icons/Add'
 import Trash from 'src/assets/icons/Trash'
 

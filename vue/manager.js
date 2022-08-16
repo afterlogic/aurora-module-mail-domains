@@ -43,7 +43,7 @@ export default {
           { path: 'search/:search/page/:page', component: Empty },
           { path: 'search/:search/page/:page/id/:id', component: EditDomain },
         ].concat(routesManager.getRouteChildren('Domain')),
-        pageUserRole: UserRoles.SuperAdmin,
+        pageUserRoles: [UserRoles.SuperAdmin],
         pageTitle: 'MAILDOMAINS.HEADING_MAILDOMAIN_SETTINGS_TABNAME',
       }
     ]

@@ -42,12 +42,6 @@ class Module extends \Aurora\System\Module\AbstractModule
 		$this->subscribeEvent('Mail::GetMailServerByDomain::before', array($this, 'onBeforeGetMailServerByDomain'));
 		$this->subscribeEvent('GetMailDomains', [$this, 'onGetMailDomains']);
 		$this->subscribeEvent('Mail::GetServerDomains::after', [$this, 'onAfterGetMailDomains']);
-		\Aurora\Modules\Core\Classes\User::extend(
-			self::GetName(),
-			[
-				'DomainId' => array('int', 0, true)
-			]
-		);
 	}
 
 	public function getDomainsManager()

@@ -115,8 +115,8 @@ export default {
       tabs: [],
       selectedTab: '',
 
-      listSplitterWidth: typesUtils.pInt(localStorage.getItem('domains-list-splitter-width'), 20),
-      tabsSplitterWidth: typesUtils.pInt(localStorage.getItem('domains-tabs-splitter-width'), 20),
+      listSplitterWidth: typesUtils.pInt(localStorage.getItem('aurora_admin_domains_splitter-width'), 20),
+      tabsSplitterWidth: typesUtils.pInt(localStorage.getItem('aurora_admin_domains_tabs_splitter-width'), 20),
     }
   },
 
@@ -181,11 +181,11 @@ export default {
     },
 
     listSplitterWidth () {
-      localStorage.setItem('domains-list-splitter-width', this.listSplitterWidth)
+      localStorage.setItem('aurora_admin_domains_splitter-width', this.listSplitterWidth)
     },
 
     tabsSplitterWidth (tabsSplitterWidth) {
-      localStorage.setItem('domains-tabs-splitter-width', tabsSplitterWidth)
+      localStorage.setItem('aurora_admin_domains_tabs_splitter-width', tabsSplitterWidth)
     },
   },
 

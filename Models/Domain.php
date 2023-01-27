@@ -11,7 +11,7 @@ namespace Aurora\Modules\MailDomains\Models;
  * @license https://www.gnu.org/licenses/agpl-3.0.html AGPL-3.0
  * @license https://afterlogic.com/products/common-licensing Afterlogic Software License
  * @copyright Copyright (c) 2023, Afterlogic Corp.
- * 
+ *
  * @property int $TenantId Identifier of tenant which contains the domain.
  * @property int $MailServerId Identifier of mail server which contains the domain.
  * @property string $Name Name of the domain.
@@ -23,7 +23,7 @@ class Domain extends \Aurora\System\Classes\Model
 {
     protected $table = 'mail_domains';
 
-	protected $moduleName = 'MailDomains';
+    protected $moduleName = 'MailDomains';
 
     /**
      * The attributes that are mass assignable.
@@ -54,24 +54,24 @@ class Domain extends \Aurora\System\Classes\Model
     protected $attributes = [
     ];
 
-	public function toResponseArray()
-	{
-		$aRes = [
-			'Id' => $this->Id,
-			'TenantId' => $this->TenantId,
-			'MailServerId' => $this->MailServerId,
-			'Name' => $this->Name,
-			'Count' => $this->Count,
-		];
+    public function toResponseArray()
+    {
+        $aRes = [
+            'Id' => $this->Id,
+            'TenantId' => $this->TenantId,
+            'MailServerId' => $this->MailServerId,
+            'Name' => $this->Name,
+            'Count' => $this->Count,
+        ];
 
         $aArgs = ['Domain' => $this];
-		\Aurora\System\EventEmitter::getInstance()->emit(
-			$this->moduleName, 
+        \Aurora\System\EventEmitter::getInstance()->emit(
+            $this->moduleName,
             'Domain::ToResponseArray',
-			$aArgs,
-			$aRes
-		);
+            $aArgs,
+            $aRes
+        );
 
         return $aRes;
-	}
+    }
 }

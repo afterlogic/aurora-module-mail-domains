@@ -14,8 +14,7 @@ class UpdateMailDomainsIndexes extends Migration
     public function up()
     {
         $prefix = Capsule::connection()->getTablePrefix();
-        Capsule::schema()->table('mail_domains', function(Blueprint $table) use ($prefix)
-        {
+        Capsule::schema()->table('mail_domains', function (Blueprint $table) use ($prefix) {
             $sm = Capsule::schema()->getConnection()->getDoctrineSchemaManager();
             $doctrineTable = $sm->listTableDetails($prefix . 'mail_domains');
 
@@ -36,8 +35,7 @@ class UpdateMailDomainsIndexes extends Migration
     public function down()
     {
         $prefix = Capsule::connection()->getTablePrefix();
-        Capsule::schema()->table('mail_domains', function (Blueprint $table) use ($prefix)
-        {
+        Capsule::schema()->table('mail_domains', function (Blueprint $table) use ($prefix) {
             $sm = Capsule::schema()->getConnection()->getDoctrineSchemaManager();
             $doctrineTable = $sm->listTableDetails($prefix . 'mail_domains');
 

@@ -14,12 +14,12 @@ namespace Aurora\Modules\MailDomains\Enums;
  */
 class ErrorCodes
 {
-	const DomainExists = 1002;
+    public const DomainExists = 1002;
 
-	/**
-	 * @var array
-	 */
-	protected $aConsts = [
-		'DomainExists' => self::DomainExists
-	];
+    /**
+     * @var array
+     */
+    protected $aConsts = [
+        'DomainExists' => self::DomainExists
+    ];
 }

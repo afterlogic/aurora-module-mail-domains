@@ -78,7 +78,7 @@ class Module extends \Aurora\System\Module\AbstractModule
             throw new \Aurora\System\Exceptions\ApiException(\Aurora\System\Notifications::InvalidInputParameter);
         }
 
-        $oTenant = \Aurora\Modules\Core\Module::Decorator()->GetTenantUnchecked($TenantId);
+        $oTenant = \Aurora\Modules\Core\Module::Decorator()->GetTenantWithoutRoleCheck($TenantId);
         $oServer = $this->getServersManager()->getServer($MailServerId);
         if (!$oTenant || !$oServer || \trim($DomainName) === '') {
             throw new \Aurora\System\Exceptions\ApiException(\Aurora\System\Notifications::InvalidInputParameter);

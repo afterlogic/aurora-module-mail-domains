@@ -276,7 +276,7 @@ class Module extends \Aurora\System\Module\AbstractModule
     public function onBeforeDeleteServer($aArgs, &$mResult)
     {
         $mDomains = $this->getDomainsManager()->getDomainsByMailServerId($aArgs['ServerId']);
-        if (is_array($mDomains)) {
+        if ($mDomains) {
             foreach ($mDomains as $oDomain) {
                 self::Decorator()->DeleteDomains($oDomain->TenantId, [$oDomain->Id]);
             }

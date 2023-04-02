@@ -19,7 +19,7 @@ export default {
 
   mutations: {
     setDomains(state, { tenantId, domains }) {
-      Vue.set(state.domains, tenantId, domains)
+      state.domains[tenantId] = domains
     },
 
     setLoadingForTenant(state, tenantId) {
@@ -28,7 +28,7 @@ export default {
   
     setDomainData ({ getters }, { domain, domainData }) {
       for (const key in domainData) {
-        Vue.set(domain.data, key, domainData[key])
+        domain.data[key] = domainData[key]
       }
     },
   },

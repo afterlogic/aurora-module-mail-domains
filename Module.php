@@ -20,9 +20,18 @@ use Illuminate\Database\Eloquent\Builder;
 class Module extends \Aurora\System\Module\AbstractModule
 {
     /*
-     * @var $oApiDomainsManager Managers\MailingLists
+     * @var Managers\Domains\Manager $oApiDomainsManager
      */
     public $oApiDomainsManager = null;
+
+    /**
+     *
+     * @return Module
+     */
+    public static function Decorator()
+    {
+        return parent::Decorator();
+    }
 
     public function init()
     {
@@ -68,6 +77,8 @@ class Module extends \Aurora\System\Module\AbstractModule
      * Creates domain.
      * @param int $TenantId Tenant identifier.
      * @param int $DomainName Domain name.
+     * @param string $DomainName
+     * 
      * @return boolean
      */
     public function CreateDomain($TenantId = 0, $MailServerId = 0, $DomainName = '')

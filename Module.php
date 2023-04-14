@@ -78,7 +78,7 @@ class Module extends \Aurora\System\Module\AbstractModule
      * @param int $TenantId Tenant identifier.
      * @param int $DomainName Domain name.
      * @param string $DomainName
-     * 
+     *
      * @return boolean
      */
     public function CreateDomain($TenantId = 0, $MailServerId = 0, $DomainName = '')

@@ -17,6 +17,8 @@ use Aurora\System\Enums\SortOrder;
  *
  * @package MailDomains
  * @subpackage Managers
+ *
+ * @property Module $oModule
  */
 class Manager extends \Aurora\System\Managers\AbstractManager
 {

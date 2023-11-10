@@ -14,7 +14,7 @@
                  @keyup.enter="save" />
       </div>
       <div class="q-ml-sm">@</div>
-      <div class="col-3 q-ml-sm">
+      <div class="col-3 q-ml-sm" v-if="selectedDomain">
         <q-select outlined dense bg-color="white" v-model="selectedDomain"
                   emit-value map-options :options="domains" option-label="name">
           <template v-slot:selected>

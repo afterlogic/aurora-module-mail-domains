@@ -26,7 +26,7 @@ export default {
 
   init (appData) {},
 
-  getPages () {
+  getRoutes () {
     const UserRoles = enums.getUserRoles()
     return [
       {

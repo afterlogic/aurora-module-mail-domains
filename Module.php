@@ -56,9 +56,7 @@ class Module extends \Aurora\System\Module\AbstractModule
             Enums\ErrorCodes::DomainExists	=> $this->i18N('ERROR_DOMAIN_EXISTS')
         ];
 
-        $this->subscribeEvent('AdminPanelWebclient::GetEntityList::before', array($this, 'onBeforeGetEntityList')); /** @deprecated since version 8.3.7 **/
         $this->subscribeEvent('Core::GetUsers::before', array($this, 'onBeforeGetUsers'));
-        $this->subscribeEvent('AdminPanelWebclient::CreateUser::after', array($this, 'onAfterAdminPanelCreateUser')); /** @deprecated since version 8.3.7 **/
         $this->subscribeEvent('Core::CreateUser::after', array($this, 'onAfterCreateUser'));
         $this->subscribeEvent('Core::DeleteTenant::after', array($this, 'onAfterDeleteTenant'));
 
@@ -240,14 +238,6 @@ class Module extends \Aurora\System\Module\AbstractModule
         return $mResult;
     }
 
-    /**
-     * @deprecated since version 8.3.7
-     */
-    public function onAfterAdminPanelCreateUser(&$aData, &$mResult)
-    {
-        $this->onAfterCreateUser($aData, $mResult);
-    }
-
     public function onAfterCreateUser(&$aData, &$mResult)
     {
         $sEmail = isset($aData['PublicId']) ? $aData['PublicId'] : '';
@@ -326,16 +316,6 @@ class Module extends \Aurora\System\Module\AbstractModule
         }
         if (count($aDomainIds)) {
             self::Decorator()->DeleteDomains($TenantId, $aDomainIds);
-        }
-    }
-
-    /**
-     * @deprecated since version 8.3.7
-     */
-    public function onBeforeGetEntityList(&$aArgs, &$mResult)
-    {
-        if ($aArgs['Type'] === 'User') {
-            $this->onBeforeGetUsers($aArgs, $mResult);
         }
     }
 

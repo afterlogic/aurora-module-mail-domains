@@ -313,8 +313,7 @@ export default {
         moduleName: 'MailDomains',
         methodName: 'DeleteDomains',
         parameters: {
-          IdList: ids,
-          DeletionConfirmedByAdmin: true
+          IdList: ids
         },
       }).then(result => {
         this.deletingIds = []

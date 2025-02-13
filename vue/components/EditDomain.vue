@@ -282,13 +282,3 @@ export default {
   },
 }
 </script>
-
-<style scoped lang="scss">
-:deep(a) {
-  text-decoration: none;
-  color: darken($primary, 20%);
-}
-:deep(a:hover) {
-  text-decoration: underline;
-}
-</style>

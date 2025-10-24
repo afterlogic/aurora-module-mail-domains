@@ -60,6 +60,7 @@ class Manager extends \Aurora\System\Managers\AbstractManager
     {
         $query = Domain::where('TenantId', $iTenantId);
         if (!empty($sSearch)) {
+            $sSearch = str_replace(['%', '_'], ['\%', '\_'], $sSearch);
             $query->where('Name', 'like', '%' . $sSearch . '%');
         }
 
@@ -78,6 +79,7 @@ class Manager extends \Aurora\System\Managers\AbstractManager
     {
         $query = Domain::where('TenantId', $iTenantId);
         if (!empty($sSearch)) {
+            $sSearch = str_replace(['%', '_'], ['\%', '\_'], $sSearch);
             $query->where('Name', 'like', '%' . $sSearch . '%');
         }
         if ($iOffset > 0) {

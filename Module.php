@@ -260,6 +260,10 @@ class Module extends \Aurora\System\Module\AbstractModule
 
     public function onAfterUpdateServer($aArgs, &$mResult)
     {
+        if ($mResult !== true) {
+            return;
+        }
+
         $iServerId = $aArgs['ServerId'];
         $iTenantId = $aArgs['TenantId'];
 
@@ -269,6 +273,12 @@ class Module extends \Aurora\System\Module\AbstractModule
             \Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::SuperAdmin);
         } else {
             \Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::TenantAdmin);
+            $oAuthenticatedUser = \Aurora\System\Api::getAuthenticatedUser();
+            if ($oServer && $oServer->OwnerType === \Aurora\Modules\Mail\Enums\ServerOwnerType::Tenant &&
+                    $oAuthenticatedUser?->Role === \Aurora\System\Enums\UserRole::TenantAdmin &&
+                    $oServer->TenantId !== $oAuthenticatedUser->IdTenant) {
+                throw new \Aurora\System\Exceptions\ApiException(\Aurora\System\Notifications::AccessDenied);
+            }
         }
 
         if ($oServer && ($oServer->OwnerType === \Aurora\Modules\Mail\Enums\ServerOwnerType::SuperAdmin ||
